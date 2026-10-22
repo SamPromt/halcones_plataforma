@@ -775,12 +775,14 @@
                     </div>
                 </div>
 
-                <!-- Mini Formulario de Postulación Rápida -->
-                <form onsubmit="submitDriverRegistration(event)" class="space-y-3 pt-2 border-t border-surface-container-highest">
-                    <p class="font-bold text-white uppercase text-[11px] tracking-wider">¿Aún no estás registrado? Postúlate aquí:</p>
+                <!-- Formulario de Postulación "¿Quieres ser Conductor?" -->
+                <form id="form-driver-application" onsubmit="submitDriverRegistration(event)" class="space-y-3 pt-2 border-t border-surface-container-highest">
+                    <p class="font-bold text-white uppercase text-[11px] tracking-wider">¿Quieres ser Conductor? Postúlate aquí:</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <input id="reg-driver-name" type="text" required placeholder="Nombre completo" class="bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-secondary">
-                        <input id="reg-driver-plate" type="text" required placeholder="Placa (Ej: TZV-412)" class="bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-2.5 text-xs text-white uppercase focus:outline-none focus:border-secondary">
+                        <input id="reg-driver-phone" type="tel" required placeholder="Teléfono / WhatsApp (Ej: 310...)" class="bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-secondary">
+                        <input id="reg-driver-plate" type="text" required placeholder="Placa (Ej: FUS-984)" class="bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-2.5 text-xs text-white uppercase focus:outline-none focus:border-secondary">
+                        <input id="reg-driver-model" type="text" required placeholder="Marca y Modelo (Ej: Chevrolet Spark 2021)" class="bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-secondary">
                     </div>
                     <button type="submit" class="btn-interact w-full py-3 rounded-xl bg-primary-container hover:bg-red-700 text-white font-headline-sm text-xs font-bold uppercase tracking-wider">
                         Enviar Solicitud de Vinculación
@@ -1360,26 +1362,32 @@
         function submitDriverRegistration(e) {
             e.preventDefault();
             const name = document.getElementById('reg-driver-name').value.trim();
+            const phone = document.getElementById('reg-driver-phone').value.trim();
             const plate = document.getElementById('reg-driver-plate').value.trim().toUpperCase();
-            if (!name || !plate) return;
+            const model = document.getElementById('reg-driver-model').value.trim();
+            if (!name || !phone || !plate || !model) return;
 
-            const fleet = HalconesStore.getFleet();
-            const newCode = 'HLC-' + Math.floor(130 + Math.random() * 60);
-            fleet.push({
-                id: newCode,
+            let postulaciones = [];
+            try {
+                postulaciones = JSON.parse(localStorage.getItem('halcones_postulaciones') || '[]');
+            } catch (_) {
+                postulaciones = [];
+            }
+
+            postulaciones.unshift({
+                id: 'POST-' + Date.now(),
                 name,
+                phone,
                 plate,
-                vehicle: 'Vehículo Afiliado',
-                status: 'DISPONIBLE',
-                reason: null,
-                currentServiceId: null,
-                lat: 4.3350 + (Math.random() * 0.008 - 0.004),
-                lng: -74.3630 + (Math.random() * 0.008 - 0.004),
-                phone: '573100000000'
+                model,
+                status: 'PENDIENTE',
+                createdAt: new Date().toISOString()
             });
-            HalconesStore.saveFleet(fleet);
+
+            localStorage.setItem('halcones_postulaciones', JSON.stringify(postulaciones));
+            document.getElementById('form-driver-application')?.reset();
             closeModal('modal-driver-portal');
-            showNotification(`¡Bienvenido ${name} (${newCode})! Ya apareces en la flota activa.`, 'verified');
+            showNotification('Solicitud enviada a la Central. Un operador revisará tu documentación', 'verified');
         }
 
         function fillDemoOperator() {
@@ -1411,3 +1419,4 @@
     </script>
 </body>
 </html>
+

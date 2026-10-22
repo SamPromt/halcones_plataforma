@@ -221,6 +221,42 @@
         </div>
     </div>
 
+    <!-- PANTALLA DE ACCESO RÁPIDO DEL CONDUCTOR (VINCULADA A halcones_flota) -->
+    <div id="driver-session-gate" class="fixed inset-0 z-[135] bg-surface/95 backdrop-blur-xl hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-surface-container w-full max-w-sm rounded-3xl p-6 shadow-[0_25px_70px_rgba(0,0,0,0.85)] border border-secondary/30">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-11 h-11 rounded-2xl bg-primary-container flex items-center justify-center text-white shadow-[0_0_15px_rgba(200,16,46,0.4)]">
+                    <span class="material-symbols-outlined text-2xl">local_taxi</span>
+                </div>
+                <div>
+                    <h2 class="font-headline-sm text-base font-black uppercase text-white leading-tight">Acceso Operativo Halcones</h2>
+                    <p class="text-[11px] text-secondary font-bold uppercase tracking-wider">Sincronizado con Flota Central</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-on-surface-variant mb-4">
+                Ingresa tu Placa o selecciona tu Móvil asignado para iniciar tu turno en Fusagasugá:
+            </p>
+
+            <!-- Ingreso por Placa -->
+            <form onsubmit="loginDriverByPlate(event)" class="space-y-2.5 mb-5">
+                <div class="flex gap-2">
+                    <input id="login-plate-input" type="text" placeholder="Placa (Ej: TZV-412)" class="flex-1 bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-3 text-sm font-mono font-bold text-white uppercase focus:outline-none focus:border-secondary">
+                    <button type="submit" class="btn-premium px-4 py-3 rounded-xl bg-secondary text-black font-headline-sm text-xs font-black uppercase tracking-wider">
+                        Ingresar
+                    </button>
+                </div>
+                <p id="login-plate-error" class="hidden text-[11px] text-error font-bold"></p>
+            </form>
+
+            <!-- Selección Rápida de Móvil Activo en halcones_flota -->
+            <div class="border-t border-surface-container-highest pt-4">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2.5">O selecciona tu Móvil asignado en flota:</p>
+                <div id="login-fleet-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- ================= HEADER OFICIAL REACTIVO AL ESTADO ================= -->
     <header id="main-header" class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-lg border-b border-surface-container-high transition-colors duration-300">
         <div class="max-w-md mx-auto px-4 py-3 flex flex-col gap-2.5">
@@ -230,7 +266,12 @@
                         <span id="header-logo-icon" class="material-symbols-outlined text-primary text-[22px]">flight_takeoff</span>
                     </div>
                     <div class="flex flex-col leading-none">
-                        <span class="font-headline-sm text-sm tracking-wider text-white font-black uppercase">HALCONES PWA</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-headline-sm text-sm tracking-wider text-white font-black uppercase">HALCONES PWA</span>
+                            <button type="button" onclick="logoutDriverSession()" title="Cambiar Móvil" class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-surface-container-high text-gray-300 hover:text-white border border-surface-variant">
+                                Cambiar Móvil
+                            </button>
+                        </div>
                         <span id="driver-code" class="font-label-plate text-[10px] text-secondary tracking-widest font-bold mt-0.5">MÓVIL HLC-102 • TZV-412</span>
                     </div>
                 </div>
@@ -687,9 +728,13 @@
         const KEYS = {
             FLOTA: 'halcones_flota',
             SERVICIOS: 'halcones_servicios',
-            BALANCE: 'halcones_balance'
+            BALANCE: 'halcones_balance',
+            DRIVER_SESSION: 'halcones_driver_session'
         };
-        const DRIVER_ID = 'HLC-102';
+        let DRIVER_ID = 'HLC-102';
+        let DRIVER_NAME = 'Julián V.';
+        let DRIVER_PLATE = 'TZV-412';
+        let DRIVER_VEHICLE = 'Renault Logan';
 
         // Catálogo local de respaldo con coordenadas reales de Fusagasugá
         const fallbackRides = [
@@ -1019,8 +1064,8 @@
                     id: 'HLC-' + Math.floor(1000 + Math.random() * 9000),
                     status: 'OFFERED',
                     driverCode: DRIVER_ID,
-                    driverName: 'Julián V.',
-                    driverPlate: 'TZV-412',
+                    driverName: DRIVER_NAME,
+                    driverPlate: DRIVER_PLATE,
                     createdAt: new Date().toISOString()
                 };
                 services.unshift(candidate);
@@ -1048,7 +1093,7 @@
                         if (srv) {
                             srv.status = 'MANUAL_REQUIRED';
                             srv.driverCode = null;
-                            srv.notes = 'No aceptado a tiempo por HLC-102 • Requiere Asignación Manual';
+                            srv.notes = `No aceptado a tiempo por ${DRIVER_ID} • Requiere Asignación Manual`;
                             localStorage.setItem(KEYS.SERVICIOS, JSON.stringify(services));
                         }
                     }
@@ -1073,8 +1118,8 @@
             }
             srv.status = 'EN_CAMINO';
             srv.driverCode = DRIVER_ID;
-            srv.driverName = 'Julián V.';
-            srv.driverPlate = 'TZV-412';
+            srv.driverName = DRIVER_NAME;
+            srv.driverPlate = DRIVER_PLATE;
             srv.assignedAt = srv.assignedAt || new Date().toISOString();
             localStorage.setItem(KEYS.SERVICIOS, JSON.stringify(services));
 
@@ -1093,7 +1138,7 @@
             const initials = custName.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
             document.getElementById('ui-active-avatar').textContent = initials || 'PH';
 
-            document.getElementById('ui-active-whatsapp').href = `https://wa.me/${custPhone}?text=${encodeURIComponent(`Hola ${custName}, soy Julián tu conductor de Halcones (Móvil HLC-102, Placa TZV-412). Voy en camino a ${currentRide.origin}.`)}`;
+            document.getElementById('ui-active-whatsapp').href = `https://wa.me/${custPhone}?text=${encodeURIComponent(`Hola ${custName}, soy ${DRIVER_NAME} tu conductor de Halcones (Móvil ${DRIVER_ID}, Placa ${DRIVER_PLATE}). Voy en camino a ${currentRide.origin}.`)}`;
             document.getElementById('ui-active-call').href = `tel:+${custPhone}`;
 
             const btn = document.getElementById('btn-action-trip');
@@ -1149,8 +1194,8 @@
             srv.status = 'COMPLETADO';
             srv.paymentMethod = metodo;
             srv.driverCode = DRIVER_ID;
-            srv.driverName = 'Julián V.';
-            srv.driverPlate = 'TZV-412';
+            srv.driverName = DRIVER_NAME;
+            srv.driverPlate = DRIVER_PLATE;
             srv.completedAt = new Date().toISOString();
             localStorage.setItem(KEYS.SERVICIOS, JSON.stringify(services));
 
@@ -1182,8 +1227,8 @@
                 ...currentRide,
                 id: currentRide.id + '-C',
                 driverCode: DRIVER_ID,
-                driverName: 'Julián V.',
-                driverPlate: 'TZV-412',
+                driverName: DRIVER_NAME,
+                driverPlate: DRIVER_PLATE,
                 status: 'CANCELADO_CONDUCTOR',
                 cancelReason: reason,
                 paymentMethod: 'Cancelado',
@@ -1339,7 +1384,7 @@
                 doc.setTextColor(0, 0, 0);
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(11);
-                doc.text('Conductor: Julián V.   |   Unidad: Móvil HLC-102   |   Placa: TZV-412 (Renault Logan)', margin + 14, 142);
+                doc.text(`Conductor: ${DRIVER_NAME}   |   Unidad: Móvil ${DRIVER_ID}   |   Placa: ${DRIVER_PLATE} (${DRIVER_VEHICLE})`, margin + 14, 142);
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(10);
                 const total = finanzas.efectivo + finanzas.transferencia;
@@ -1403,6 +1448,101 @@
             }, 3200);
         }
 
+        // Gestión de Sesión Rápida por Placa o Móvil Asignado en halcones_flota
+        function getActiveFleetList() {
+            let fleet = [];
+            try { fleet = JSON.parse(localStorage.getItem(KEYS.FLOTA)) || []; } catch (_) {}
+            if (!fleet.length) {
+                fleet = [
+                    { id: 'HLC-102', name: 'Julián V.', plate: 'TZV-412', vehicle: 'Renault Logan', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3368, lng: -74.3638, phone: '573114508812' },
+                    { id: 'HLC-104', name: 'Carlos M.', plate: 'KRM-883', vehicle: 'Chevrolet Sail', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3412, lng: -74.3685, phone: '573123009911' },
+                    { id: 'HLC-108', name: 'Andrés R.', plate: 'FUS-319', vehicle: 'Hyundai Grand i10', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3315, lng: -74.3590, phone: '573142201188' }
+                ];
+                localStorage.setItem(KEYS.FLOTA, JSON.stringify(fleet));
+            }
+            return fleet;
+        }
+
+        function renderLoginFleetOptions() {
+            const fleet = getActiveFleetList();
+            const listEl = document.getElementById('login-fleet-list');
+            if (!listEl) return;
+            listEl.innerHTML = fleet.map(d => `
+                <button type="button" onclick="selectDriverSession('${d.id}')" class="btn-premium w-full p-3 rounded-2xl bg-surface-container-lowest hover:bg-surface-container-high border border-surface-variant flex items-center justify-between text-left transition-all">
+                    <div>
+                        <p class="text-xs font-black text-white uppercase">${d.id} • ${d.name}</p>
+                        <p class="text-[10px] text-gray-400 font-mono">${d.plate} • ${d.vehicle || 'Vehículo Afiliado'}</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg bg-secondary/15 text-secondary font-mono text-[10px] font-bold uppercase">Entrar →</span>
+                </button>
+            `).join('');
+        }
+
+        function applyDriverIdentity(driverObj) {
+            DRIVER_ID = driverObj.id;
+            DRIVER_NAME = driverObj.name;
+            DRIVER_PLATE = driverObj.plate;
+            DRIVER_VEHICLE = driverObj.vehicle || 'Vehículo Afiliado';
+
+            document.getElementById('driver-code').textContent = `MÓVIL ${DRIVER_ID} • ${DRIVER_PLATE}`;
+            document.title = `Móvil ${DRIVER_ID} | Halcones PWA Conductor`;
+        }
+
+        function selectDriverSession(driverId) {
+            const fleet = getActiveFleetList();
+            const found = fleet.find(d => d.id === driverId);
+            if (!found) return;
+
+            localStorage.setItem(KEYS.DRIVER_SESSION, JSON.stringify(found));
+            applyDriverIdentity(found);
+
+            const gate = document.getElementById('driver-session-gate');
+            gate.classList.add('hidden');
+            gate.classList.remove('flex');
+
+            renderHistorial();
+            setStatus('DISPONIBLE', true);
+            showToast(`Turno iniciado: Móvil ${found.id} (${found.plate})`);
+
+            setTimeout(() => {
+                if (driverStatus === 'DISPONIBLE' && !currentRide) {
+                    simulateNewRandomRide();
+                }
+            }, 1500);
+        }
+
+        function loginDriverByPlate(e) {
+            e.preventDefault();
+            const input = document.getElementById('login-plate-input');
+            const errEl = document.getElementById('login-plate-error');
+            const cleanInput = input.value.trim().toUpperCase().replace(/\s+/g, '');
+            if (!cleanInput) return;
+
+            const fleet = getActiveFleetList();
+            const found = fleet.find(d =>
+                String(d.plate).toUpperCase().replace(/[^A-Z0-9]/g, '') === cleanInput.replace(/[^A-Z0-9]/g, '') ||
+                String(d.id).toUpperCase() === cleanInput
+            );
+
+            if (!found) {
+                errEl.textContent = 'Placa o Móvil no encontrado en la flota activa. Verifica si ya fue aprobado en Consola.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            errEl.classList.add('hidden');
+            selectDriverSession(found.id);
+        }
+
+        function logoutDriverSession() {
+            clearInterval(timerInterval);
+            localStorage.removeItem(KEYS.DRIVER_SESSION);
+            renderLoginFleetOptions();
+            const gate = document.getElementById('driver-session-gate');
+            gate.classList.remove('hidden');
+            gate.classList.add('flex');
+        }
+
         // Escuchar eventos en tiempo real desde 1_cliente.html y 2_consola.html
         window.addEventListener('storage', (e) => {
             if (e.key === 'halcones_client_cancel_alert' && e.newValue) {
@@ -1417,6 +1557,7 @@
                     populateOfferUI(offeredToMe);
                 }
             } else if (e.key === KEYS.FLOTA) {
+                renderLoginFleetOptions();
                 const fleet = JSON.parse(localStorage.getItem(KEYS.FLOTA) || '[]');
                 const me = fleet.find(d => d.id === DRIVER_ID);
                 if (me && me.status === 'DISPONIBLE' && driverStatus === 'FUERA_SERVICIO') {
@@ -1428,25 +1569,32 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadStoreState();
             actualizarBalance();
-            renderHistorial();
             document.getElementById('input-new-goal').value = finanzas.meta.toLocaleString('es-CO');
-            setStatus('DISPONIBLE', true);
 
-            // Verificar si hay carrera ofrecida o activa para HLC-102 al abrir
-            const services = JSON.parse(localStorage.getItem(KEYS.SERVICIOS) || '[]');
-            const offered = services.find(s => s.driverCode === DRIVER_ID && s.status === 'OFFERED');
-            if (offered) {
-                populateOfferUI(offered);
+            const savedSession = JSON.parse(localStorage.getItem(KEYS.DRIVER_SESSION) || 'null');
+            if (!savedSession || !savedSession.id) {
+                renderLoginFleetOptions();
+                const gate = document.getElementById('driver-session-gate');
+                gate.classList.remove('hidden');
+                gate.classList.add('flex');
             } else {
-                setTimeout(() => {
-                    if (driverStatus === 'DISPONIBLE' && !currentRide) {
-                        simulateNewRandomRide();
-                    }
-                }, 1800);
+                applyDriverIdentity(savedSession);
+                renderHistorial();
+                setStatus('DISPONIBLE', true);
+
+                const services = JSON.parse(localStorage.getItem(KEYS.SERVICIOS) || '[]');
+                const offered = services.find(s => s.driverCode === DRIVER_ID && s.status === 'OFFERED');
+                if (offered) {
+                    populateOfferUI(offered);
+                } else {
+                    setTimeout(() => {
+                        if (driverStatus === 'DISPONIBLE' && !currentRide) {
+                            simulateNewRandomRide();
+                        }
+                    }, 1800);
+                }
             }
         });
     </script>
 </body>
-</html>
-
 </html>

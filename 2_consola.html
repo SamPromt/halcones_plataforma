@@ -458,7 +458,7 @@
                             <span id="fleet-count-badge" class="font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-300">5 unidades</span>
                         </div>
 
-                        <!-- Botones de Filtro de Flota en Turno: Todos | Libres (verde) | En Ruta (azul/ámbar) | Fuera de Servicio / Varados (rojo) -->
+                        <!-- Botones de Filtro de Flota en Turno + Pestaña de Postulaciones Pendientes -->
                         <div class="grid grid-cols-2 gap-1.5 mb-3 bg-slate-950 p-1.5 rounded-2xl border border-slate-800 text-[10px] font-bold uppercase">
                             <button type="button" onclick="setFleetFilter('ALL')" id="flt-ALL" class="py-1.5 px-2 rounded-xl bg-slate-800 text-white flex items-center justify-center gap-1.5 transition">
                                 <span>Todos</span>
@@ -474,6 +474,13 @@
                             <button type="button" onclick="setFleetFilter('FUERA_SERVICIO')" id="flt-FUERA_SERVICIO" class="py-1.5 px-2 rounded-xl text-red-300 hover:bg-slate-900 flex items-center justify-center gap-1.5 transition">
                                 <span class="w-2 h-2 rounded-full bg-red-500"></span>
                                 <span>Varados / Fuera</span>
+                            </button>
+                            <button type="button" onclick="setFleetFilter('POSTULACIONES')" id="flt-POSTULACIONES" class="col-span-2 py-2 px-3 rounded-xl border border-primary/30 bg-primary/10 text-primary-light hover:bg-primary/20 flex items-center justify-between transition mt-0.5">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[15px] text-primary">person_add</span>
+                                    <span>Postulaciones pendientes</span>
+                                </span>
+                                <span id="postulaciones-badge" class="rounded-full bg-primary px-2 py-0.5 font-mono text-[9px] font-black text-white">0</span>
                             </button>
                         </div>
 
@@ -506,7 +513,8 @@
             SERVICIOS: 'halcones_servicios',
             BALANCE: 'halcones_balance',
             OPERATOR: 'halcones_operator_session',
-            NOVEDADES: 'halcones_novedades'
+            NOVEDADES: 'halcones_novedades',
+            POSTULACIONES: 'halcones_postulaciones'
         };
 
         let mapInstance = null;
@@ -1120,17 +1128,114 @@
         }
 
         // ============================================================================
-        // 6. FLOTA EN TURNO CON FILTROS (Todos, Libres, En Ruta, Varados)
+        // 6. FLOTA EN TURNO CON FILTROS + GESTIÓN DE POSTULACIONES PENDIENTES
         // ============================================================================
+        function getPostulaciones() {
+            try {
+                const raw = localStorage.getItem(KEYS.POSTULACIONES);
+                if (!raw) {
+                    const demoPostulaciones = [
+                        {
+                            id: 'POST-1001',
+                            name: 'Diego Alejandro Vargas',
+                            phone: '312 480 9120',
+                            plate: 'FUS-842',
+                            model: 'Chevrolet Spark GT 2022',
+                            status: 'PENDIENTE',
+                            createdAt: new Date(Date.now() - 600000).toISOString()
+                        }
+                    ];
+                    localStorage.setItem(KEYS.POSTULACIONES, JSON.stringify(demoPostulaciones));
+                    return demoPostulaciones;
+                }
+                return JSON.parse(raw) || [];
+            } catch (_) {
+                return [];
+            }
+        }
+
+        function savePostulaciones(list) {
+            localStorage.setItem(KEYS.POSTULACIONES, JSON.stringify(list));
+        }
+
+        function generateNextDriverId(fleet) {
+            const usedNumbers = new Set(
+                fleet.map(d => {
+                    const m = String(d.id).match(/HLC-(\d+)/i);
+                    return m ? parseInt(m[1], 10) : 0;
+                })
+            );
+            let candidate = 103;
+            while (usedNumbers.has(candidate)) {
+                candidate++;
+            }
+            return `HLC-${candidate}`;
+        }
+
+        function approveApplication(postId) {
+            const postulaciones = getPostulaciones();
+            const idx = postulaciones.findIndex(p => p.id === postId);
+            if (idx === -1) return;
+
+            const applicant = postulaciones[idx];
+            const fleet = getFleet();
+            const newDriverId = generateNextDriverId(fleet);
+
+            const newDriver = {
+                id: newDriverId,
+                name: applicant.name,
+                plate: String(applicant.plate).toUpperCase(),
+                vehicle: applicant.model || 'Vehículo Afiliado',
+                status: 'DISPONIBLE',
+                reason: null,
+                currentServiceId: null,
+                lat: 4.3355 + (Math.random() * 0.008 - 0.004),
+                lng: -74.3635 + (Math.random() * 0.008 - 0.004),
+                phone: String(applicant.phone || '573100000000').replace(/\D/g, '')
+            };
+
+            fleet.unshift(newDriver);
+            saveFleet(fleet);
+
+            postulaciones.splice(idx, 1);
+            savePostulaciones(postulaciones);
+
+            addOperationalIncident('ESPECIAL', `Postulación aprobada: ${newDriver.name} (${newDriver.plate}) vinculado como Móvil ${newDriverId} en estado DISPONIBLE.`);
+            renderAll();
+            notifyConsole(
+                `Móvil ${newDriverId} Aprobado y Activo`,
+                `${newDriver.name} (${newDriver.plate}) fue agregado a la flota en estado DISPONIBLE.`,
+                'verified'
+            );
+        }
+
+        function rejectApplication(postId) {
+            const postulaciones = getPostulaciones();
+            const idx = postulaciones.findIndex(p => p.id === postId);
+            if (idx === -1) return;
+
+            const removed = postulaciones[idx];
+            postulaciones.splice(idx, 1);
+            savePostulaciones(postulaciones);
+
+            addOperationalIncident('CANCELADO', `Postulación de ${removed.name} (${removed.plate}) rechazada por el operador.`);
+            renderAll();
+            notifyConsole(
+                'Postulación Rechazada',
+                `La solicitud de ${removed.name} (${removed.plate}) fue descartada.`,
+                'person_remove'
+            );
+        }
+
         function setFleetFilter(filter) {
             currentFleetFilter = filter;
-            ['ALL', 'DISPONIBLE', 'EN_SERVICIO', 'FUERA_SERVICIO'].forEach(k => {
+            ['ALL', 'DISPONIBLE', 'EN_SERVICIO', 'FUERA_SERVICIO', 'POSTULACIONES'].forEach(k => {
                 const btn = document.getElementById('flt-' + k);
                 if (btn) {
                     if (k === filter) {
-                        btn.classList.add('bg-slate-800', 'ring-1', 'ring-slate-600');
+                        btn.classList.add('bg-slate-800', 'ring-1', 'ring-slate-500');
                     } else {
-                        btn.classList.remove('bg-slate-800', 'ring-1', 'ring-slate-600');
+                        btn.classList.remove('bg-slate-800', 'ring-1', 'ring-slate-500');
                     }
                 }
             });
@@ -1139,6 +1244,10 @@
 
         function renderFleet() {
             const fleet = getFleet();
+            const postulaciones = getPostulaciones().filter(p => p.status === 'PENDIENTE');
+            const postBadge = document.getElementById('postulaciones-badge');
+            if (postBadge) postBadge.textContent = String(postulaciones.length);
+
             const freeCount = fleet.filter(d => d.status === 'DISPONIBLE').length;
             const busyCount = fleet.filter(d => d.status === 'EN_SERVICIO').length;
             const outCount = fleet.filter(d => d.status === 'FUERA_SERVICIO').length;
@@ -1148,11 +1257,52 @@
             document.getElementById('kpi-out').textContent = String(outCount);
             document.getElementById('fleet-count-badge').textContent = `${fleet.length} móviles`;
 
+            const container = document.getElementById('fleet-list-container');
+
+            // Si está seleccionada la pestaña de Postulaciones pendientes
+            if (currentFleetFilter === 'POSTULACIONES') {
+                if (postulaciones.length === 0) {
+                    container.innerHTML = `
+                        <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 text-center">
+                            <span class="material-symbols-outlined text-slate-500 text-3xl mb-1">how_to_reg</span>
+                            <p class="text-xs font-bold text-white uppercase">Sin postulaciones pendientes</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Los nuevos registros desde "¿Quieres ser Conductor?" en 1_cliente.html aparecerán aquí.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = postulaciones.map(p => `
+                        <div class="rounded-2xl border border-primary/40 bg-slate-950/90 p-3.5 space-y-2.5 shadow-lg">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">${p.status}</span>
+                                    <p class="font-bold text-xs text-white mt-1.5">${p.name}</p>
+                                    <p class="text-[11px] font-mono text-secondary">📞 ${p.phone}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-mono text-xs font-black px-2 py-1 rounded bg-slate-800 text-white border border-slate-700 block">${p.plate}</span>
+                                    <span class="text-[9px] font-mono text-slate-400 block mt-1">${formatTimeShort(p.createdAt)}</span>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-300 bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                                🚗 <strong class="text-white">Modelo:</strong> ${p.model}
+                            </p>
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <button type="button" onclick="rejectApplication('${p.id}')" class="btn-action py-2 px-2 rounded-xl border border-red-500/40 bg-red-500/10 hover:bg-red-600 hover:text-white text-red-300 text-[10px] font-bold uppercase tracking-wider">
+                                    Rechazar
+                                </button>
+                                <button type="button" onclick="approveApplication('${p.id}')" class="btn-action py-2 px-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-black uppercase tracking-wider shadow-[0_0_14px_rgba(16,185,129,0.35)]">
+                                    Aprobar y Asignar Móvil
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                return;
+            }
+
             const filtered = currentFleetFilter === 'ALL'
                 ? fleet
                 : fleet.filter(d => d.status === currentFleetFilter);
-
-            const container = document.getElementById('fleet-list-container');
             if (filtered.length === 0) {
                 container.innerHTML = `<p class="text-xs text-slate-400 p-4 text-center border border-slate-800 rounded-2xl">No hay unidades en este estado.</p>`;
             } else {
@@ -1521,7 +1671,10 @@
 
         // Sincronización entre pestañas (Cliente <-> Consola <-> Conductor)
         window.addEventListener('storage', (e) => {
-            if ([KEYS.FLOTA, KEYS.SERVICIOS, KEYS.NOVEDADES, 'halcones_client_cancel_alert', 'halcones_driver_cancel_alert'].includes(e.key)) {
+            if ([KEYS.FLOTA, KEYS.SERVICIOS, KEYS.NOVEDADES, KEYS.POSTULACIONES, 'halcones_client_cancel_alert', 'halcones_driver_cancel_alert'].includes(e.key)) {
+                if (e.key === KEYS.POSTULACIONES && e.newValue) {
+                    notifyConsole('Nueva Postulación Recibida', 'Un conductor envió su documentación desde la web pública.', 'person_add');
+                }
                 if (e.key === 'halcones_driver_cancel_alert' && e.newValue) {
                     try {
                         const data = JSON.parse(e.newValue);
