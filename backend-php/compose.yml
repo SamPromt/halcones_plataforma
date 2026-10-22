@@ -1,0 +1,13 @@
+services:
+  soketi:
+    image: quay.io/soketi/soketi:1.6-16-debian
+    restart: unless-stopped
+    environment:
+      SOKETI_DEFAULT_APP_ID: halcones-dev
+      SOKETI_DEFAULT_APP_KEY: halcones-local-key
+      SOKETI_DEFAULT_APP_SECRET: halcones-local-secret-change-before-deployment
+      SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES: "false"
+      SOKETI_DEFAULT_APP_ENABLED: "true"
+    ports:
+      - "127.0.0.1:6001:6001"
+      - "127.0.0.1:9601:9601"

@@ -1,0 +1,29 @@
+{
+  "name": "halcones/mobility-api",
+  "description": "Modular monolith API for Halcones mobility and dispatch",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": ">=8.0",
+    "firebase/php-jwt": "^7.0",
+    "slim/psr7": "^1.7",
+    "slim/slim": "^4.14",
+    "vlucas/phpdotenv": "^5.6",
+    "pusher/pusher-php-server": "^7.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Halcones\\": "src/"
+    }
+  },
+  "scripts": {
+    "database:migrate": "php bin/migrate.php",
+    "serve": "php -S 127.0.0.1:8080 -t public public/index.php",
+    "outbox:work": "php bin/outbox-worker.php",
+    "test": "php tests/run.php"
+  },
+  "config": {
+    "sort-packages": true,
+    "platform-check": true
+  }
+}

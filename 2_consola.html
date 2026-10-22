@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Despacho Operativo | Halcones Fusagasugá</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,700;1,900&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C8102E',
+                        'primary-light': '#ffb3b1',
+                        secondary: '#4edea3',
+                        tertiary: '#ffb95f',
+                        error: '#ffb4ab',
+                        'error-container': '#93000a',
+                        surface: '#0d1117',
+                        panel: '#161b22',
+                        panelAlt: '#1f2630',
+                        muted: '#94a3b8'
+                    },
+                    fontFamily: {
+                        headline: ['Montserrat', 'sans-serif'],
+                        body: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        :root { color-scheme: dark; }
+        body {
+            background: #0d1117;
+            color: #e2e8f0;
+            font-family: 'Outfit', sans-serif;
+            background-image: radial-gradient(circle at top right, rgba(200, 16, 46, 0.12), transparent 35%);
+            overflow-x: hidden;
+        }
+        #fleet-map .leaflet-tile {
+            filter: invert(1) hue-rotate(180deg) contrast(1.06) brightness(0.88);
+        }
+        .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .btn-action {
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+        .btn-action:active { transform: scale(0.97); }
+    </style>
+</head>
+<body class="min-h-screen bg-surface text-slate-100">
+
+    <!-- TOAST DE NOTIFICACIÓN OPERATIVA -->
+    <div id="console-toast" aria-live="polite" class="pointer-events-none fixed bottom-6 right-6 z-[150] translate-y-24 opacity-0 rounded-2xl border-l-4 border-primary bg-slate-950/95 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.65)] transition-all duration-300 max-w-sm">
+        <div class="flex items-center gap-3">
+            <span id="toast-icon" class="material-symbols-outlined text-primary text-2xl">radar</span>
+            <div>
+                <p id="toast-title" class="font-headline text-xs font-black uppercase tracking-wider text-white">Central de Despacho</p>
+                <p id="toast-desc" class="text-xs text-slate-300 mt-0.5">Operación ejecutada.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ASIGNACIÓN MANUAL (FILTRO HUMANO DEL OPERADOR) -->
+    <div id="modal-manual-assign" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-panel w-full max-w-lg rounded-3xl p-6 border border-slate-700 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-400 flex items-center justify-center">
+                        <span class="material-symbols-outlined">support_agent</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline text-base font-black uppercase tracking-wider text-white">Despacho Manual de Unidad</h3>
+                        <p id="manual-modal-subtitle" class="text-xs text-amber-300 font-mono">Seleccione un conductor libre para el servicio</p>
+                    </div>
+                </div>
+                <button onclick="closeManualModal()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Resumen de la solicitud a despachar -->
+            <div id="manual-service-summary" class="bg-slate-950/80 rounded-2xl p-3.5 border border-slate-800 mb-4 text-xs space-y-1"></div>
+
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Conductores en estado Libre / Disponible:</p>
+            <div id="manual-drivers-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-thin pr-1 mb-5"></div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+                <button onclick="closeManualModal()" class="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-xs font-bold uppercase text-slate-300 hover:text-white">
+                    Cancelar
+                </button>
+                <button onclick="confirmManualDispatch()" class="btn-action px-5 py-2.5 rounded-xl bg-primary hover:bg-red-700 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(200,16,46,0.4)] flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px]">send</span>
+                    <span>Despachar Unidad Seleccionada</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex min-h-screen flex-col xl:flex-row">
+        <!-- SIDEBAR DE LA CENTRAL DE DESPACHO OPERATIVO -->
+        <aside class="w-full border-b border-slate-800 bg-panel xl:w-72 xl:border-b-0 xl:border-r flex flex-col justify-between shrink-0">
+            <div>
+                <!-- Cabecera de Identidad Operador -->
+                <div class="flex items-center justify-between px-5 py-5 border-b border-slate-800/80">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/40 shadow-[0_0_15px_rgba(200,16,46,0.25)]">
+                            <span class="material-symbols-outlined text-2xl">radar</span>
+                        </div>
+                        <div>
+                            <p class="font-headline text-base font-black uppercase tracking-wider text-white leading-none">Central</p>
+                            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary mt-1">Despacho Halcones</p>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-300">
+                        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        En Vivo
+                    </span>
+                </div>
+
+                <!-- Navegación Estricta del Despachador / Controlador -->
+                <div class="px-3 py-4 space-y-1.5">
+                    <p class="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Módulos de Control</p>
+                    <a href="#despacho-panel" class="flex items-center gap-3 rounded-2xl border border-primary/40 bg-primary/15 px-4 py-3 text-xs font-black uppercase tracking-wider text-white shadow-sm">
+                        <span class="material-symbols-outlined text-primary text-[20px]">Space_dashboard</span>
+                        <span>Consola de Despacho</span>
+                    </a>
+                    <a href="4_detalle.html?from=consola" class="flex items-center gap-3 rounded-2xl border border-transparent hover:border-slate-700 hover:bg-slate-900/70 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-secondary text-[20px]">fact_check</span>
+                        <span>Bitácora / Auditoría</span>
+                    </a>
+                    <a href="1_cliente.html" class="flex items-center gap-3 rounded-2xl border border-transparent hover:border-slate-700 hover:bg-slate-900/70 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-slate-400 text-[20px]">public</span>
+                        <span>Web Pública Cliente</span>
+                    </a>
+                    <a href="3_conductor.html" target="_blank" class="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950/60 hover:border-secondary/40 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-secondary transition-all mt-2">
+                        <span class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary text-[20px]">smartphone</span>
+                            <span>Vista PWA Conductor</span>
+                        </span>
+                        <span class="material-symbols-outlined text-[15px]">open_in_new</span>
+                    </a>
+                </div>
+
+                <!-- Simulador de Eventos Operativos (Pruebas en Vivo de las 3 Tareas + Casos Límite) -->
+                <div class="px-4 py-3 border-t border-slate-800 space-y-2">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Simulador Central / WhatsApp</p>
+                    <button onclick="simulateIncomingOrder(false)" class="btn-action w-full py-2.5 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">smart_toy</span>
+                        <span>+ Pedido WhatsApp (Auto 30s)</span>
+                    </button>
+                    <button onclick="simulateIncomingOrder(true)" class="btn-action w-full py-2.5 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-bold uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">pan_tool</span>
+                        <span>+ Pedido Especial (Manual)</span>
+                    </button>
+                    <button onclick="simulateClientWhatsAppCancel()" class="btn-action w-full py-2.5 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-[11px] font-bold uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">cancel</span>
+                        <span>Cliente Cancela por WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Perfil del Despachador en Turno -->
+            <div class="border-t border-slate-800 px-4 py-4 bg-slate-950/40">
+                <div class="mb-2 flex items-center justify-between">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Controlador en Turno</p>
+                    <span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold uppercase text-emerald-300">Autenticado</span>
+                </div>
+                <div class="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/90 p-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 border border-primary/40 font-headline text-sm font-black text-primary">OP</div>
+                    <div class="min-w-0 flex-1">
+                        <p id="operator-name" class="font-bold text-xs text-white truncate">Javier Ramírez</p>
+                        <p id="operator-code" class="text-[10px] uppercase tracking-wider text-slate-400">Central Radioteléfono Fusa</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ÁREA OPERATIVA PRINCIPAL -->
+        <main id="despacho-panel" class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header Operativo con KPIs en Vivo -->
+            <header class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 bg-slate-950/70 px-5 py-4">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-secondary">Central de Despacho Operativo • Fusagasugá</p>
+                    <h1 class="mt-0.5 font-headline text-lg sm:text-xl font-black uppercase tracking-wide text-white">Supervisión IA, Despacho Manual y Control de Flota</h1>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <div class="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        <span class="text-slate-400 font-bold uppercase text-[10px]">Libres:</span>
+                        <span id="kpi-free" class="font-mono font-black text-emerald-300">0</span>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs">
+                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                        <span class="text-slate-400 font-bold uppercase text-[10px]">En Carrera:</span>
+                        <span id="kpi-busy" class="font-mono font-black text-amber-300">0</span>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs">
+                        <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                        <span class="text-slate-400 font-bold uppercase text-[10px]">Varados/Fuera:</span>
+                        <span id="kpi-out" class="font-mono font-black text-red-400">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- GRID PRINCIPAL DE 3 COLUMNAS -->
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 p-4 sm:p-5 flex-1">
+                
+                <!-- COLUMNA 1 (4 cols): BANDEJA DE SOLICITUDES (IA 30s + INTERVENCIÓN MANUAL) -->
+                <section class="xl:col-span-4 rounded-3xl border border-slate-800 bg-panel p-4 flex flex-col justify-between shadow-xl">
+                    <div>
+                        <div class="mb-3 flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">inbox</span>
+                                <div>
+                                    <h2 class="font-headline text-xs font-black uppercase tracking-wider text-white">Cola de Despacho</h2>
+                                    <p class="text-[10px] text-slate-400">Bot WhatsApp IA (30s) & Filtro Humano</p>
+                                </div>
+                            </div>
+                            <span id="pending-badge" class="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-300">0 pendientes</span>
+                        </div>
+
+                        <!-- Contenedor de Tarjetas Pendientes -->
+                        <div id="pending-tickets-container" class="space-y-3 max-h-[540px] overflow-y-auto scrollbar-thin pr-1"></div>
+                    </div>
+
+                    <!-- Leyenda de Reglas de Negocio para el Operador -->
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-1">
+                        <p class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> <strong>IA Automático (30s):</strong> Asigna el móvil libre más cercano al llegar a 0s.</p>
+                        <p class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> <strong>Intervención Manual:</strong> Solicitudes especiales (Chinauta/Baúl) o reasignaciones.</p>
+                    </div>
+                </section>
+
+                <!-- COLUMNA 2 (5 cols): MAPA SATELITAL FUSAGASUGÁ + SERVICIOS EN CURSO Y BITÁCORA -->
+                <section class="xl:col-span-5 flex flex-col gap-4">
+                    <!-- Mapa en Vivo -->
+                    <div class="relative rounded-3xl border border-slate-800 bg-panel p-3 shadow-xl overflow-hidden">
+                        <div class="absolute left-6 top-6 z-[400] flex items-center gap-2 rounded-full border border-emerald-500/30 bg-slate-950/90 px-3 py-1.5 shadow-lg">
+                            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span class="font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-300">GPS Fusagasugá • Tiempo Real</span>
+                        </div>
+                        <div id="fleet-map" class="h-[310px] w-full rounded-2xl border border-slate-800 bg-slate-900"></div>
+                    </div>
+
+                    <!-- Lista de Viajes En Curso y Bitácora (Clic abre 4_detalle.html) -->
+                    <div class="rounded-3xl border border-slate-800 bg-panel p-4 shadow-xl flex-1 flex flex-col">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">history_edu</span>
+                                <div>
+                                    <h2 class="font-headline text-xs font-black uppercase tracking-wider text-white">Viajes en Curso y Bitácora de Auditoría</h2>
+                                    <p class="text-[10px] text-slate-400">Haz clic en cualquier servicio para abrir su hoja de ruta en 4_detalle.html</p>
+                                </div>
+                            </div>
+                            <a href="4_detalle.html?from=consola" class="text-[10px] font-bold uppercase text-secondary hover:underline">Ver Bitácora</a>
+                        </div>
+
+                        <div id="active-and-history-list" class="space-y-2 max-h-[230px] overflow-y-auto scrollbar-thin pr-1"></div>
+                    </div>
+                </section>
+
+                <!-- COLUMNA 3 (3 cols): FLOTA EN TURNO (VERDE LIBRE / AZUL-ÁMBAR EN SERVICIO / ROJO VARADO) -->
+                <section class="xl:col-span-3 rounded-3xl border border-slate-800 bg-panel p-4 flex flex-col justify-between shadow-xl">
+                    <div>
+                        <div class="mb-3 flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div>
+                                <h2 class="font-headline text-xs font-black uppercase tracking-wider text-white">Flota en Turno</h2>
+                                <p class="text-[10px] text-slate-400">Clic en unidad libre para despacho directo</p>
+                            </div>
+                            <span id="fleet-count-badge" class="font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-300">5 unidades</span>
+                        </div>
+
+                        <!-- Filtros rápidos de estado de flota -->
+                        <div class="grid grid-cols-4 gap-1 mb-3 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[10px] font-bold uppercase">
+                            <button onclick="setFleetFilter('ALL')" id="flt-ALL" class="py-1.5 rounded-lg bg-slate-800 text-white">Todos</button>
+                            <button onclick="setFleetFilter('DISPONIBLE')" id="flt-DISPONIBLE" class="py-1.5 rounded-lg text-emerald-400 hover:bg-slate-900">Libres</button>
+                            <button onclick="setFleetFilter('EN_SERVICIO')" id="flt-EN_SERVICIO" class="py-1.5 rounded-lg text-amber-300 hover:bg-slate-900">Ruta</button>
+                            <button onclick="setFleetFilter('FUERA_SERVICIO')" id="flt-FUERA_SERVICIO" class="py-1.5 rounded-lg text-red-400 hover:bg-slate-900">Varados</button>
+                        </div>
+
+                        <div id="fleet-list-container" class="space-y-2.5 max-h-[480px] overflow-y-auto scrollbar-thin pr-1"></div>
+                    </div>
+
+                    <!-- Leyenda de Estados de Flota -->
+                    <div class="mt-4 pt-3 border-t border-slate-800 text-[10px] text-slate-400 space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Verde: Disponible</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Ámbar/Azul: En Servicio</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span> Rojo: Fuera de Servicio / Varado (con motivo)
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // ============================================================================
+        // ARQUITECTURA MODULAR: CENTRAL DE DESPACHO OPERATIVO (2_consola.html)
+        // ============================================================================
+        const KEYS = {
+            FLOTA: 'halcones_flota',
+            SERVICIOS: 'halcones_servicios',
+            BALANCE: 'halcones_balance',
+            OPERATOR: 'halcones_operator_session'
+        };
+
+        let mapInstance = null;
+        let mapMarkers = new Map();
+        let currentFleetFilter = 'ALL';
+        let selectedManualServiceId = null;
+
+        function ensureEcosystemData() {
+            if (!localStorage.getItem(KEYS.FLOTA)) {
+                const defaultFleet = [
+                    { id: 'HLC-102', name: 'Julián V.', plate: 'TZV-412', vehicle: 'Renault Logan', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3368, lng: -74.3638, phone: '573114508812' },
+                    { id: 'HLC-104', name: 'Carlos M.', plate: 'KRM-883', vehicle: 'Chevrolet Sail', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3412, lng: -74.3685, phone: '573123009911' },
+                    { id: 'HLC-108', name: 'Andrés R.', plate: 'FUS-319', vehicle: 'Hyundai Grand i10', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3315, lng: -74.3590, phone: '573142201188' },
+                    { id: 'HLC-115', name: 'Jorge E.', plate: 'BGT-504', vehicle: 'Kia Picanto', status: 'EN_SERVICIO', reason: null, currentServiceId: 'HLC-9380', lat: 4.3390, lng: -74.3610, phone: '573158903344' },
+                    { id: 'HLC-121', name: 'Luis P.', plate: 'LFM-721', vehicle: 'Nissan March', status: 'FUERA_SERVICIO', reason: 'Avería Mecánica (Varado)', currentServiceId: null, lat: 4.3295, lng: -74.3670, phone: '573187705566' }
+                ];
+                localStorage.setItem(KEYS.FLOTA, JSON.stringify(defaultFleet));
+            }
+            if (!localStorage.getItem(KEYS.SERVICIOS)) {
+                const now = new Date();
+                const initialServices = [
+                    {
+                        id: 'HLC-9421',
+                        origin: 'Cra 6 #8-32, Centro (Éxito)',
+                        dest: 'Calle 18 #4-12, Barrio Manila',
+                        price: 8000,
+                        dist: '2.8 km',
+                        duration: '8 min',
+                        customerName: 'Camila Méndez',
+                        customerPhone: '573105554321',
+                        notes: 'Estándar • Despacho Automático IA',
+                        requiresManual: false,
+                        status: 'AUTOMATIC_DISPATCH',
+                        timerSeconds: 30,
+                        driverCode: null,
+                        driverName: null,
+                        driverPlate: null,
+                        paymentMethod: 'Pendiente',
+                        createdAt: new Date(now.getTime() - 15000).toISOString(),
+                        assignedAt: null,
+                        startedAt: null,
+                        completedAt: null,
+                        lat: 4.3422,
+                        lng: -74.3691
+                    },
+                    {
+                        id: 'HLC-9419',
+                        origin: 'Clínica Belén, Barrio Balmoral',
+                        dest: 'Condominio El Encanto, Vía Chinauta',
+                        price: 25000,
+                        dist: '14.5 km',
+                        duration: '22 min',
+                        customerName: 'Hernando Pardo',
+                        customerPhone: '573154449876',
+                        notes: 'Con baúl grande y 3 maletas • Para Chinauta',
+                        requiresManual: true,
+                        status: 'MANUAL_REQUIRED',
+                        timerSeconds: 0,
+                        driverCode: null,
+                        driverName: null,
+                        driverPlate: null,
+                        paymentMethod: 'Pendiente',
+                        createdAt: new Date(now.getTime() - 90000).toISOString(),
+                        assignedAt: null,
+                        startedAt: null,
+                        completedAt: null,
+                        lat: 4.2980,
+                        lng: -74.4120
+                    },
+                    {
+                        id: 'HLC-9380',
+                        origin: 'Universidad de Cundinamarca, Coburgo',
+                        dest: 'Carrera 3 #14-20, Barrio Pekín',
+                        price: 8000,
+                        dist: '3.4 km',
+                        duration: '11 min',
+                        customerName: 'Sebastián Mora',
+                        customerPhone: '573201112233',
+                        notes: 'Estándar',
+                        requiresManual: false,
+                        status: 'EN_VIAJE',
+                        timerSeconds: 0,
+                        driverCode: 'HLC-115',
+                        driverName: 'Jorge E.',
+                        driverPlate: 'BGT-504',
+                        paymentMethod: 'Pendiente',
+                        createdAt: new Date(now.getTime() - 540000).toISOString(),
+                        assignedAt: new Date(now.getTime() - 510000).toISOString(),
+                        startedAt: new Date(now.getTime() - 360000).toISOString(),
+                        completedAt: null,
+                        lat: 4.3310,
+                        lng: -74.3560
+                    },
+                    {
+                        id: 'HLC-9355',
+                        origin: 'Parque Principal, Centro',
+                        dest: 'Hospital San Rafael, Balmoral',
+                        price: 7500,
+                        dist: '2.1 km',
+                        duration: '7 min',
+                        customerName: 'Dra. Marcela Cortés',
+                        customerPhone: '573119998877',
+                        notes: 'Estándar',
+                        requiresManual: false,
+                        status: 'COMPLETADO',
+                        timerSeconds: 0,
+                        driverCode: 'HLC-102',
+                        driverName: 'Julián V.',
+                        driverPlate: 'TZV-412',
+                        paymentMethod: 'Efectivo',
+                        createdAt: new Date(now.getTime() - 3600000).toISOString(),
+                        assignedAt: new Date(now.getTime() - 3570000).toISOString(),
+                        startedAt: new Date(now.getTime() - 3400000).toISOString(),
+                        completedAt: new Date(now.getTime() - 2980000).toISOString(),
+                        lat: 4.3358,
+                        lng: -74.3662
+                    }
+                ];
+                localStorage.setItem(KEYS.SERVICIOS, JSON.stringify(initialServices));
+            }
+        }
+
+        function getFleet() {
+            try { return JSON.parse(localStorage.getItem(KEYS.FLOTA)) || []; }
+            catch (_) { return []; }
+        }
+        function saveFleet(fleet) {
+            localStorage.setItem(KEYS.FLOTA, JSON.stringify(fleet));
+        }
+        function getServices() {
+            try { return JSON.parse(localStorage.getItem(KEYS.SERVICIOS)) || []; }
+            catch (_) { return []; }
+        }
+        function saveServices(services) {
+            localStorage.setItem(KEYS.SERVICIOS, JSON.stringify(services));
+        }
+
+        let toastTimer = null;
+        function notifyConsole(title, desc, icon = 'rocket_launch') {
+            const toast = document.getElementById('console-toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-desc').textContent = desc;
+            document.getElementById('toast-icon').textContent = icon;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3400);
+        }
+
+        // Inicialización del Mapa Leaflet en Fusagasugá
+        function initMap() {
+            const el = document.getElementById('fleet-map');
+            if (!window.L || mapInstance) return;
+            mapInstance = L.map(el, { zoomControl: true }).setView([4.3365, -74.3635], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(mapInstance);
+            setTimeout(() => mapInstance.invalidateSize(), 200);
+        }
+
+        // Renderizado de la Columna 1: Solicitudes Pendientes (Automático 30s vs Manual / Reasignación)
+        function renderPendingTickets() {
+            const services = getServices();
+            const pending = services.filter(s => ['AUTOMATIC_DISPATCH', 'MANUAL_REQUIRED', 'REASIGNACION_URGENTE'].includes(s.status));
+            const badge = document.getElementById('pending-badge');
+            badge.textContent = `${pending.length} pendiente${pending.length === 1 ? '' : 's'}`;
+
+            const container = document.getElementById('pending-tickets-container');
+            if (pending.length === 0) {
+                container.innerHTML = `
+                    <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 text-center">
+                        <span class="material-symbols-outlined text-emerald-400 text-3xl mb-2">task_alt</span>
+                        <p class="text-xs font-bold uppercase text-white">Sin solicitudes en cola</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Todas las órdenes han sido despachadas. Usa los botones del simulador para crear nuevas solicitudes.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = pending.map(s => {
+                const isUrgent = s.status === 'REASIGNACION_URGENTE';
+                const isManual = s.status === 'MANUAL_REQUIRED' || isUrgent;
+                const timerVal = typeof s.timerSeconds === 'number' ? s.timerSeconds : 30;
+                const pct = Math.max(0, Math.min(100, Math.round((timerVal / 30) * 100)));
+
+                const cardBorder = isUrgent
+                    ? 'border-red-500/70 bg-red-950/20'
+                    : isManual
+                        ? 'border-amber-500/60 bg-amber-950/15'
+                        : 'border-slate-700 bg-slate-950/80';
+
+                const statusPill = isUrgent
+                    ? `<span class="rounded-full border border-red-500/50 bg-red-500/20 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase text-red-300 animate-pulse">¡Reasignación Urgente!</span>`
+                    : isManual
+                        ? `<span class="rounded-full border border-amber-500/50 bg-amber-500/20 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase text-amber-300">Requiere Asignación Manual</span>`
+                        : `<span class="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] font-bold text-emerald-300">IA Auto • ${timerVal}s</span>`;
+
+                const autoTimerBlock = !isManual ? `
+                    <div class="mt-3 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex items-center justify-between text-[10px] mb-1">
+                            <span class="text-emerald-300 font-bold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[13px] animate-spin">sync</span>
+                                Asignando unidad óptima por proximidad...
+                            </span>
+                            <span class="font-mono font-bold text-white">${timerVal}s</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-400 transition-all duration-500" style="width: ${pct}%;"></div>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="mt-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-[11px] text-amber-200 flex items-start gap-2">
+                        <span class="material-symbols-outlined text-amber-400 text-[16px] shrink-0 mt-0.5">warning</span>
+                        <div>
+                            <p class="font-bold uppercase text-[10px] text-amber-300">${isUrgent ? 'Cancelado por Conductor Anterior' : 'Filtro Humano Requerido'}</p>
+                            <p class="text-[11px] text-slate-200">${s.cancelReason || s.notes || 'Requerimiento especial del pasajero'}</p>
+                        </div>
+                    </div>
+                `;
+
+                return `
+                    <article class="rounded-2xl border ${cardBorder} p-4 shadow-lg transition-all">
+                        <div class="mb-2.5 flex items-center justify-between gap-2">
+                            <a href="4_detalle.html?id=${encodeURIComponent(s.id)}&from=consola" class="font-headline text-sm font-black uppercase text-white hover:text-secondary underline decoration-slate-600">#${s.id}</a>
+                            ${statusPill}
+                        </div>
+
+                        <div class="space-y-1.5 text-xs text-slate-300">
+                            <div class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] text-secondary shrink-0">trip_origin</span>
+                                <p><strong class="text-white">Origen:</strong> ${s.origin}</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] text-primary shrink-0">location_on</span>
+                                <p><strong class="text-white">Destino:</strong> ${s.dest}</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-1 text-[11px] text-slate-400">
+                                <span>👤 ${s.customerName || 'Pasajero WhatsApp'}</span>
+                                <span class="font-mono font-black text-sm text-secondary">$${Number(s.price).toLocaleString('es-CO')} COP</span>
+                            </div>
+                        </div>
+
+                        ${autoTimerBlock}
+
+                        <div class="mt-3.5 grid grid-cols-2 gap-2">
+                            <button onclick="dispatchAuto('${s.id}')" class="btn-action rounded-xl bg-emerald-500/20 hover:bg-emerald-500 hover:text-black border border-emerald-500/40 px-3 py-2.5 text-[10px] font-black uppercase tracking-wider text-emerald-300 transition">
+                                Despacho Auto
+                            </button>
+                            <button onclick="openManualModal('${s.id}')" class="btn-action rounded-xl bg-primary hover:bg-red-700 px-3 py-2.5 text-[10px] font-black uppercase tracking-wider text-white shadow-[0_0_16px_rgba(200,16,46,0.3)] transition">
+                                Asignar Manual
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // Renderizado de Columna 2 (Inferior): Viajes en Curso y Bitácora Conectados a 4_detalle.html
+        function renderActiveAndHistory() {
+            const services = getServices();
+            const list = services.filter(s => !['AUTOMATIC_DISPATCH', 'MANUAL_REQUIRED', 'REASIGNACION_URGENTE'].includes(s.status));
+            const container = document.getElementById('active-and-history-list');
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 p-4 text-center">No hay servicios en curso ni finalizados aún.</p>`;
+                return;
+            }
+
+            const statusBadgeMap = {
+                OFFERED: { label: 'Ofrecido al Móvil', cls: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
+                EN_CAMINO: { label: 'En Camino a Recogida', cls: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+                EN_VIAJE: { label: 'En Curso (Con Pasajero)', cls: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+                COMPLETADO: { label: 'Completado', cls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
+                CANCELADO_CLIENTE: { label: 'Cancelado por Cliente', cls: 'bg-red-500/20 text-red-300 border-red-500/40' },
+                CANCELADO_CONDUCTOR: { label: 'Cancelado por Conductor', cls: 'bg-red-500/20 text-red-300 border-red-500/40' }
+            };
+
+            container.innerHTML = list.map(s => {
+                const st = statusBadgeMap[s.status] || { label: s.status, cls: 'bg-slate-800 text-slate-300 border-slate-700' };
+                const driverInfo = s.driverCode ? `${s.driverCode} (${s.driverName})` : 'Sin unidad';
+                return `
+                    <a href="4_detalle.html?id=${encodeURIComponent(s.id)}&from=consola" class="block rounded-2xl border border-slate-800 hover:border-slate-600 bg-slate-950/75 p-3 transition-all">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-headline text-xs font-black text-white">#${s.id}</span>
+                                <span class="text-[11px] text-slate-400 font-mono">• ${driverInfo}</span>
+                            </div>
+                            <span class="rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase ${st.cls}">${st.label}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] text-slate-300">
+                            <span class="truncate max-w-[70%]">${s.origin.split(',')[0]} → ${s.dest.split(',')[0]}</span>
+                            <span class="font-mono font-bold text-secondary">$${Number(s.price).toLocaleString('es-CO')}</span>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // Renderizado de Columna 3: Flota en Tiempo Real (Verde, Azul/Ámbar, Rojo con Motivo) + Mapa
+        function setFleetFilter(filter) {
+            currentFleetFilter = filter;
+            ['ALL', 'DISPONIBLE', 'EN_SERVICIO', 'FUERA_SERVICIO'].forEach(k => {
+                const btn = document.getElementById('flt-' + k);
+                if (btn) {
+                    if (k === filter) {
+                        btn.classList.add('bg-slate-800', 'text-white');
+                    } else {
+                        btn.classList.remove('bg-slate-800', 'text-white');
+                    }
+                }
+            });
+            renderFleet();
+        }
+
+        function renderFleet() {
+            const fleet = getFleet();
+            const freeCount = fleet.filter(d => d.status === 'DISPONIBLE').length;
+            const busyCount = fleet.filter(d => d.status === 'EN_SERVICIO').length;
+            const outCount = fleet.filter(d => d.status === 'FUERA_SERVICIO').length;
+
+            document.getElementById('kpi-free').textContent = String(freeCount);
+            document.getElementById('kpi-busy').textContent = String(busyCount);
+            document.getElementById('kpi-out').textContent = String(outCount);
+            document.getElementById('fleet-count-badge').textContent = `${fleet.length} móviles`;
+
+            const filtered = currentFleetFilter === 'ALL'
+                ? fleet
+                : fleet.filter(d => d.status === currentFleetFilter);
+
+            const container = document.getElementById('fleet-list-container');
+            container.innerHTML = filtered.map(d => {
+                if (d.status === 'DISPONIBLE') {
+                    return `
+                        <div class="rounded-2xl border border-emerald-500/30 bg-slate-950/80 p-3 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]"></span>
+                                    <div>
+                                        <p class="font-bold text-xs text-white">${d.name} <span class="font-mono text-[10px] text-emerald-300">(${d.id})</span></p>
+                                        <p class="text-[10px] uppercase tracking-wider text-slate-400">${d.plate} • ${d.vehicle}</p>
+                                    </div>
+                                </div>
+                                <span class="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-0.5 text-[9px] font-bold uppercase text-emerald-300">Libre</span>
+                            </div>
+                            <button onclick="quickAssignToDriver('${d.id}')" class="btn-action w-full py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500 hover:text-black text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
+                                Asignar Solicitud Pendiente
+                            </button>
+                        </div>
+                    `;
+                } else if (d.status === 'EN_SERVICIO') {
+                    const srvId = d.currentServiceId || 'HLC-9380';
+                    return `
+                        <div class="rounded-2xl border border-amber-500/35 bg-slate-950/80 p-3 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="h-3 w-3 rounded-full bg-amber-400 animate-pulse"></span>
+                                    <div>
+                                        <p class="font-bold text-xs text-white">${d.name} <span class="font-mono text-[10px] text-amber-300">(${d.id})</span></p>
+                                        <p class="text-[10px] uppercase tracking-wider text-slate-400">${d.plate} • ${d.vehicle}</p>
+                                    </div>
+                                </div>
+                                <span class="rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-0.5 text-[9px] font-bold uppercase text-amber-300">En Servicio</span>
+                            </div>
+                            <div class="flex items-center justify-between bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[10px]">
+                                <span class="text-slate-400">Servicio activo:</span>
+                                <a href="4_detalle.html?id=${encodeURIComponent(srvId)}&from=consola" class="font-mono font-bold text-amber-300 hover:underline">#${srvId} → Auditar</a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const motivo = d.reason || 'Varado / Fuera de Turno';
+                    return `
+                        <div title="Motivo: ${motivo}" class="rounded-2xl border border-red-500/40 bg-red-950/15 p-3 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="h-3 w-3 rounded-full bg-red-500"></span>
+                                    <div>
+                                        <p class="font-bold text-xs text-white">${d.name} <span class="font-mono text-[10px] text-red-300">(${d.id})</span></p>
+                                        <p class="text-[10px] uppercase tracking-wider text-slate-400">${d.plate} • ${d.vehicle}</p>
+                                    </div>
+                                </div>
+                                <span class="rounded-full border border-red-500/40 bg-red-500/20 px-2 py-0.5 text-[9px] font-bold uppercase text-red-300">Varado / Fuera</span>
+                            </div>
+                            <div class="flex items-center justify-between bg-red-950/40 px-2.5 py-1.5 rounded-lg border border-red-500/30 text-[10px]">
+                                <span class="text-red-200 truncate">🔧 ${motivo}</span>
+                                <button onclick="reactivateDriverFromConsole('${d.id}')" class="text-emerald-300 hover:underline font-bold ml-2 shrink-0">Habilitar</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            // Actualizar Marcadores en Mapa Leaflet
+            if (mapInstance && window.L) {
+                mapMarkers.forEach(m => m.remove());
+                mapMarkers.clear();
+
+                fleet.forEach(d => {
+                    const color = d.status === 'DISPONIBLE'
+                        ? '#10b981'
+                        : d.status === 'EN_SERVICIO'
+                            ? '#f59e0b'
+                            : '#ef4444';
+                    const statusLabel = d.status === 'DISPONIBLE'
+                        ? 'LIBRE / DISPONIBLE'
+                        : d.status === 'EN_SERVICIO'
+                            ? `EN SERVICIO (#${d.currentServiceId || ''})`
+                            : `FUERA DE SERVICIO (${d.reason || 'Varado'})`;
+
+                    const marker = L.circleMarker([d.lat, d.lng], {
+                        radius: 9,
+                        color,
+                        fillColor: color,
+                        fillOpacity: 0.9,
+                        weight: 2
+                    }).bindPopup(`<strong>${d.name} (${d.id})</strong><br>Placa: ${d.plate}<br>Estado: ${statusLabel}`).addTo(mapInstance);
+                    mapMarkers.set(d.id, marker);
+                });
+            }
+        }
+
+        // LÓGICA DE DESPACHO AUTOMÁTICO Y MANUAL
+        function assignServiceToDriver(serviceId, driverId, isManual = false) {
+            const services = getServices();
+            const fleet = getFleet();
+            const srv = services.find(s => s.id === serviceId);
+            const drv = fleet.find(d => d.id === driverId);
+
+            if (!srv || !drv) return;
+
+            srv.driverCode = drv.id;
+            srv.driverName = drv.name;
+            srv.driverPlate = drv.plate;
+            srv.assignedAt = new Date().toISOString();
+            // Si es asignado al conductor principal de la PWA (HLC-102), pasa a OFFERED para que suene en 3_conductor.html
+            srv.status = drv.id === 'HLC-102' ? 'OFFERED' : 'EN_CAMINO';
+            srv.timerSeconds = 0;
+
+            drv.status = 'EN_SERVICIO';
+            drv.currentServiceId = srv.id;
+
+            saveServices(services);
+            saveFleet(fleet);
+            renderAll();
+
+            notifyConsole(
+                isManual ? `Despacho Manual: #${srv.id}` : `IA Despachó: #${srv.id}`,
+                `Unidad ${drv.id} (${drv.name} • ${drv.plate}) asignada exitosamente.`,
+                'local_taxi'
+            );
+        }
+
+        function dispatchAuto(serviceId) {
+            const fleet = getFleet();
+            // Priorizar HLC-102 si está libre para que el usuario vea la recepción en 3_conductor.html
+            const available = fleet.filter(d => d.status === 'DISPONIBLE');
+            if (available.length === 0) {
+                const services = getServices();
+                const srv = services.find(s => s.id === serviceId);
+                if (srv) {
+                    srv.status = 'MANUAL_REQUIRED';
+                    srv.notes = 'Ningún conductor disponible en barrido automático';
+                    saveServices(services);
+                    renderAll();
+                }
+                notifyConsole('Sin unidades libres', 'La solicitud pasó a Requiere Asignación Manual.', 'warning');
+                return;
+            }
+            const preferred = available.find(d => d.id === 'HLC-102') || available[0];
+            assignServiceToDriver(serviceId, preferred.id, false);
+        }
+
+        function openManualModal(serviceId) {
+            selectedManualServiceId = serviceId;
+            const services = getServices();
+            const fleet = getFleet();
+            const srv = services.find(s => s.id === serviceId);
+            if (!srv) return;
+
+            const available = fleet.filter(d => d.status === 'DISPONIBLE');
+            document.getElementById('manual-modal-subtitle').textContent = `Servicio #${srv.id} • Tarifa $${Number(srv.price).toLocaleString('es-CO')} COP`;
+            document.getElementById('manual-service-summary').innerHTML = `
+                <p><strong class="text-white">Origen:</strong> ${srv.origin}</p>
+                <p><strong class="text-white">Destino:</strong> ${srv.dest}</p>
+                <p class="text-amber-300"><strong>Observación:</strong> ${srv.cancelReason || srv.notes || 'Asignación manual por operador'}</p>
+            `;
+
+            const listEl = document.getElementById('manual-drivers-list');
+            if (available.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-red-300 bg-red-950/30 border border-red-500/30 p-3 rounded-xl">No hay conductores libres en este instante. Habilita una unidad en la columna de Flota.</p>`;
+            } else {
+                listEl.innerHTML = available.map((d, idx) => `
+                    <label class="flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-900 hover:border-emerald-400 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <input type="radio" name="manual_driver" value="${d.id}" ${idx === 0 ? 'checked' : ''} class="accent-emerald-400">
+                            <div>
+                                <p class="text-xs font-bold text-white">${d.name} <span class="font-mono text-emerald-300">(${d.id})</span></p>
+                                <p class="text-[10px] text-slate-400 uppercase">${d.plate} • ${d.vehicle}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded">A 0.8 km</span>
+                    </label>
+                `).join('');
+            }
+
+            const modal = document.getElementById('modal-manual-assign');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeManualModal() {
+            const modal = document.getElementById('modal-manual-assign');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            selectedManualServiceId = null;
+        }
+
+        function confirmManualDispatch() {
+            if (!selectedManualServiceId) return;
+            const checked = document.querySelector('input[name="manual_driver"]:checked');
+            if (!checked) {
+                notifyConsole('Seleccione un conductor', 'No hay unidad libre seleccionada.', 'error');
+                return;
+            }
+            const serviceId = selectedManualServiceId;
+            closeManualModal();
+            assignServiceToDriver(serviceId, checked.value, true);
+        }
+
+        function quickAssignToDriver(driverId) {
+            const services = getServices();
+            const firstPending = services.find(s => ['REASIGNACION_URGENTE', 'MANUAL_REQUIRED', 'AUTOMATIC_DISPATCH'].includes(s.status));
+            if (!firstPending) {
+                notifyConsole('Sin solicitudes pendientes', 'Usa el botón "+ Pedido WhatsApp" para generar una orden.', 'info');
+                return;
+            }
+            assignServiceToDriver(firstPending.id, driverId, true);
+        }
+
+        function reactivateDriverFromConsole(driverId) {
+            const fleet = getFleet();
+            const drv = fleet.find(d => d.id === driverId);
+            if (!drv) return;
+            drv.status = 'DISPONIBLE';
+            drv.reason = null;
+            drv.currentServiceId = null;
+            saveFleet(fleet);
+            renderAll();
+            notifyConsole(`Unidad ${driverId} Habilitada`, `${drv.name} ahora figura como Disponible.`, 'check_circle');
+        }
+
+        // SIMULADORES DE SOLICITUDES Y CANCELACIÓN POR CLIENTE (EDGE CASES)
+        function simulateIncomingOrder(isSpecialManual) {
+            const services = getServices();
+            const newId = 'HLC-' + Math.floor(1000 + Math.random() * 9000);
+            const sampleNormal = [
+                { origin: 'Cra 6 #8-32, Centro (Éxito)', dest: 'Calle 18 #4-12, Barrio Manila', price: 8000, dist: '2.8 km', customer: 'Valeria Castaño' },
+                { origin: 'Hospital San Rafael, Balmoral', dest: 'Universidad de Cundinamarca, Coburgo', price: 7500, dist: '2.3 km', customer: 'Andrés Felipe Ríos' },
+                { origin: 'Terminal de Transportes, La Pampa', dest: 'Carrera 1 #12-08, Barrio Pekín', price: 9000, dist: '4.1 km', customer: 'Gloria Patricia Soto' }
+            ];
+            const sampleSpecial = [
+                { origin: 'Supermercado Éxito, Centro', dest: 'Hacienda San Miguel, Vía Chinauta', price: 25000, dist: '14.2 km', customer: 'Familia Mendoza', notes: 'Con baúl grande • Viaje a Chinauta' },
+                { origin: 'Clínica Belén, Balmoral', dest: 'Vereda La Aguadita', price: 18000, dist: '9.5 km', customer: 'Carlos Julio Pérez', notes: 'Viaje rural + silla de ruedas en baúl' }
+            ];
+
+            const pick = isSpecialManual
+                ? sampleSpecial[Math.floor(Math.random() * sampleSpecial.length)]
+                : sampleNormal[Math.floor(Math.random() * sampleNormal.length)];
+
+            services.unshift({
+                id: newId,
+                origin: pick.origin,
+                dest: pick.dest,
+                price: pick.price,
+                dist: pick.dist,
+                duration: isSpecialManual ? '20 min' : '8 min',
+                customerName: pick.customer,
+                customerPhone: '573105559988',
+                notes: isSpecialManual ? pick.notes : 'Estándar • Bot WhatsApp IA',
+                requiresManual: isSpecialManual,
+                status: isSpecialManual ? 'MANUAL_REQUIRED' : 'AUTOMATIC_DISPATCH',
+                timerSeconds: isSpecialManual ? 0 : 30,
+                driverCode: null,
+                driverName: null,
+                driverPlate: null,
+                paymentMethod: 'Pendiente',
+                createdAt: new Date().toISOString(),
+                assignedAt: null,
+                startedAt: null,
+                completedAt: null,
+                lat: 4.3370,
+                lng: -74.3630
+            });
+
+            saveServices(services);
+            renderAll();
+            notifyConsole(
+                isSpecialManual ? `Nueva Orden Manual #${newId}` : `Nueva Orden IA #${newId}`,
+                isSpecialManual ? `Requiere asignación manual (${pick.notes}).` : `Temporizador automático de 30s iniciado.`,
+                isSpecialManual ? 'pan_tool' : 'smart_toy'
+            );
+        }
+
+        function simulateClientWhatsAppCancel() {
+            const services = getServices();
+            const target = services.find(s => ['OFFERED', 'EN_CAMINO', 'EN_VIAJE', 'AUTOMATIC_DISPATCH', 'MANUAL_REQUIRED'].includes(s.status));
+            if (!target) {
+                notifyConsole('Sin carreras activas', 'No hay ninguna carrera activa para cancelar.', 'info');
+                return;
+            }
+
+            const prevDriver = target.driverCode;
+            target.status = 'CANCELADO_CLIENTE';
+            target.cancelReason = 'Cliente envió "Cancelar" desde WhatsApp';
+            target.completedAt = new Date().toISOString();
+            saveServices(services);
+
+            if (prevDriver) {
+                const fleet = getFleet();
+                const drv = fleet.find(d => d.id === prevDriver);
+                if (drv) {
+                    drv.status = 'DISPONIBLE';
+                    drv.currentServiceId = null;
+                    saveFleet(fleet);
+                }
+            }
+
+            localStorage.setItem('halcones_client_cancel_alert', JSON.stringify({
+                serviceId: target.id,
+                driverCode: prevDriver || 'HLC-102',
+                timestamp: Date.now()
+            }));
+
+            renderAll();
+            notifyConsole(
+                `Cancelado por Cliente (#${target.id})`,
+                `La tarjeta pasó a Cancelado y el móvil ${prevDriver || ''} volvió a DISPONIBLE.`,
+                'cancel'
+            );
+        }
+
+        // TICKER DE 1 SEGUNDO PARA EL TEMPORIZADOR DE 30S DE LA IA
+        function tickAutoDispatchTimers() {
+            const services = getServices();
+            let changed = false;
+
+            services.forEach(s => {
+                if (s.status === 'AUTOMATIC_DISPATCH') {
+                    s.timerSeconds = (typeof s.timerSeconds === 'number' ? s.timerSeconds : 30) - 1;
+                    changed = true;
+                    if (s.timerSeconds <= 0) {
+                        const fleet = getFleet();
+                        const available = fleet.filter(d => d.status === 'DISPONIBLE');
+                        if (available.length > 0) {
+                            const chosen = available.find(d => d.id === 'HLC-102') || available[0];
+                            s.driverCode = chosen.id;
+                            s.driverName = chosen.name;
+                            s.driverPlate = chosen.plate;
+                            s.assignedAt = new Date().toISOString();
+                            s.status = chosen.id === 'HLC-102' ? 'OFFERED' : 'EN_CAMINO';
+                            s.timerSeconds = 0;
+
+                            chosen.status = 'EN_SERVICIO';
+                            chosen.currentServiceId = s.id;
+                            saveFleet(fleet);
+                            notifyConsole(`IA Despachó #${s.id}`, `Asignado en automático a ${chosen.name} (${chosen.id}).`, 'smart_toy');
+                        } else {
+                            s.status = 'MANUAL_REQUIRED';
+                            s.notes = 'Tiempo IA agotado (30s) • Requiere Asignación Manual';
+                            s.timerSeconds = 0;
+                            notifyConsole(`#${s.id} pasó a Manual`, 'Ninguna unidad libre tras 30s. Intervención requerida.', 'warning');
+                        }
+                    }
+                }
+            });
+
+            if (changed) {
+                saveServices(services);
+                renderAll();
+            }
+        }
+
+        function renderAll() {
+            renderPendingTickets();
+            renderActiveAndHistory();
+            renderFleet();
+        }
+
+        // Sincronización entre pestañas (Cliente <-> Consola <-> Conductor)
+        window.addEventListener('storage', (e) => {
+            if ([KEYS.FLOTA, KEYS.SERVICIOS, 'halcones_client_cancel_alert', 'halcones_driver_cancel_alert'].includes(e.key)) {
+                renderAll();
+                if (e.key === 'halcones_driver_cancel_alert' && e.newValue) {
+                    try {
+                        const data = JSON.parse(e.newValue);
+                        notifyConsole(`¡Reasignación Urgente #${data.serviceId}!`, `Conductor canceló: "${data.reason}". Asigna otra unidad.`, 'warning');
+                    } catch (_) {}
+                }
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            ensureEcosystemData();
+            const opSession = JSON.parse(localStorage.getItem(KEYS.OPERATOR) || 'null');
+            if (opSession && opSession.name) {
+                document.getElementById('operator-name').textContent = opSession.name;
+            }
+            initMap();
+            renderAll();
+            setInterval(tickAutoDispatchTimers, 1000);
+        });
+    </script>
+</body>
+</html>

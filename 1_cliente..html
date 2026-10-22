@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html class="dark scroll-smooth" lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Halcones Movilidad | Tu Transporte Rápido y Seguro en Fusagasugá</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,700;1,900&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-container": "#00311f",
+                        "on-tertiary": "#472a00",
+                        "tertiary": "#ffb95f",
+                        "on-surface": "#e5e2e1",
+                        "on-primary-fixed-variant": "#92001c",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "error-container": "#93000a",
+                        "secondary": "#4edea3",
+                        "surface": "#131313",
+                        "background": "#131313",
+                        "on-primary-container": "#ffdad8",
+                        "on-tertiary-container": "#ffddb8",
+                        "surface-variant": "#353534",
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#e5bdbb",
+                        "outline": "#ac8887",
+                        "surface-dim": "#131313",
+                        "secondary-fixed-dim": "#4edea3",
+                        "surface-container": "#201f1f",
+                        "primary": "#ffb3b1",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-background": "#e5e2e1",
+                        "surface-container-highest": "#353534",
+                        "primary-fixed": "#ffdad8",
+                        "primary-fixed-dim": "#ffb3b1",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "tertiary-fixed": "#ffddb8",
+                        "tertiary-container": "#8e5900",
+                        "surface-tint": "#ffb3b1",
+                        "surface-bright": "#3a3939",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-primary": "#680011",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-primary": "#bf0229",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-secondary-fixed": "#002113",
+                        "on-primary-fixed": "#410007",
+                        "inverse-surface": "#e5e2e1",
+                        "secondary-container": "#00a572",
+                        "on-error-container": "#ffdad6",
+                        "primary-container": "#c8102e",
+                        "on-secondary": "#003824",
+                        "inverse-on-surface": "#313030",
+                        "outline-variant": "#5c403f",
+                        "surface-container-low": "#1c1b1b"
+                    },
+                    fontFamily: {
+                        "label-plate": ["JetBrains Mono", "monospace"],
+                        "headline-lg": ["Montserrat", "sans-serif"],
+                        "body-sm": ["Outfit", "sans-serif"],
+                        "body-lg": ["Outfit", "sans-serif"],
+                        "headline-sm": ["Montserrat", "sans-serif"],
+                        "label-caps": ["Outfit", "sans-serif"],
+                        "body-md": ["Outfit", "sans-serif"],
+                        "display-hero": ["Montserrat", "sans-serif"],
+                        "label-telemetry": ["JetBrains Mono", "monospace"],
+                        "headline-md": ["Montserrat", "sans-serif"],
+                        "headline-lg-mobile": ["Montserrat", "sans-serif"]
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        html, body { margin: 0; padding: 0; scroll-behavior: smooth; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #131313; }
+        ::-webkit-scrollbar-thumb { background: #353534; border-radius: 3px; }
+        .nav-link-active {
+            background-color: #c8102e !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 0 16px rgba(200, 16, 46, 0.35);
+        }
+        .btn-interact {
+            transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s ease, background-color 0.18s ease;
+        }
+        .btn-interact:active { transform: scale(0.97); }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-white">
+
+    <!-- TOAST DE RETROALIMENTACIÓN GLOBAL -->
+    <div id="global-toast" class="fixed top-20 right-4 z-[150] max-w-sm rounded-2xl border border-secondary/40 bg-surface-container-highest/95 px-4 py-3 text-white shadow-2xl backdrop-blur-md transition-all duration-300 opacity-0 translate-y-[-12px] pointer-events-none flex items-center gap-3">
+        <span id="global-toast-icon" class="material-symbols-outlined text-secondary">check_circle</span>
+        <p id="global-toast-text" class="text-xs font-bold tracking-wide">Listo</p>
+    </div>
+
+    <!-- HEADER PRINCIPAL FIJO -->
+    <header class="fixed top-0 left-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-surface-container-highest/50">
+        <div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
+            <!-- Marca -->
+            <a href="#inicio" class="flex items-center gap-3 group focus:outline-none">
+                <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center shadow-[0_0_15px_rgba(200,16,46,0.4)] group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-white text-[24px]">flight_takeoff</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-headline-sm text-lg font-black uppercase text-white leading-none tracking-wider">Halcones</span>
+                    <span class="font-label-caps text-[10px] text-secondary uppercase tracking-widest mt-0.5 font-bold">Fusagasugá 24/7</span>
+                </div>
+            </a>
+
+            <!-- Navegación Interna con Scroll-Spy Activo en Rojo -->
+            <nav id="main-nav" class="hidden lg:flex items-center gap-1.5 bg-surface-container-lowest p-1.5 rounded-xl border border-surface-container-highest/60">
+                <a href="#inicio" data-section="inicio" class="nav-spy-link nav-link-active px-3.5 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all">Inicio</a>
+                <a href="#servicios" data-section="servicios" class="nav-spy-link px-3.5 py-1.5 rounded-lg text-xs uppercase tracking-wider text-on-surface-variant hover:text-white transition-all">Servicios y Tarifas</a>
+                <a href="#cobertura" data-section="cobertura" class="nav-spy-link px-3.5 py-1.5 rounded-lg text-xs uppercase tracking-wider text-on-surface-variant hover:text-white transition-all">Cobertura</a>
+                <a href="#testimonios" data-section="testimonios" class="nav-spy-link px-3.5 py-1.5 rounded-lg text-xs uppercase tracking-wider text-on-surface-variant hover:text-white transition-all">Testimonios</a>
+                <a href="#faq" data-section="faq" class="nav-spy-link px-3.5 py-1.5 rounded-lg text-xs uppercase tracking-wider text-on-surface-variant hover:text-white transition-all">Preguntas</a>
+            </nav>
+
+            <!-- Accesos: Soy Conductor + Central Operador + Botón Menú Móvil -->
+            <div class="flex items-center gap-2">
+                <button onclick="openModal('modal-driver-portal')" class="btn-interact hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-secondary/30 text-secondary text-xs font-bold uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-[17px]">local_taxi</span>
+                    <span>Soy Conductor</span>
+                </button>
+
+                <button onclick="openModal('modal-operator-login')" title="Acceso Operador / Central" class="btn-interact inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-surface-container-high border border-surface-container-highest text-on-surface-variant hover:text-white text-xs font-bold uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-[16px] text-primary">lock</span>
+                    <span class="hidden md:inline">Central</span>
+                </button>
+
+                <button onclick="toggleWhatsAppSim()" class="btn-interact inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary-container hover:bg-red-700 text-white text-xs font-black uppercase tracking-wider shadow-[0_0_16px_rgba(200,16,46,0.35)]">
+                    <span class="material-symbols-outlined text-[17px]">chat</span>
+                    <span class="hidden sm:inline">Pedir Ahora</span>
+                </button>
+
+                <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-xl bg-surface-container text-on-surface hover:text-white focus:outline-none" aria-label="Abrir menú">
+                    <span id="mobile-menu-icon" class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menú Desplegable Mobile -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-surface-container-lowest border-b border-surface-container-highest px-4 pt-2 pb-4 space-y-2">
+            <div class="grid grid-cols-2 gap-1.5">
+                <a href="#inicio" data-section="inicio" onclick="toggleMobileMenu()" class="nav-spy-link nav-link-active px-3 py-2 rounded-lg text-xs font-bold uppercase text-center">Inicio</a>
+                <a href="#servicios" data-section="servicios" onclick="toggleMobileMenu()" class="nav-spy-link px-3 py-2 rounded-lg text-xs font-bold uppercase text-on-surface-variant text-center bg-surface-container">Servicios</a>
+                <a href="#cobertura" data-section="cobertura" onclick="toggleMobileMenu()" class="nav-spy-link px-3 py-2 rounded-lg text-xs font-bold uppercase text-on-surface-variant text-center bg-surface-container">Cobertura</a>
+                <a href="#testimonios" data-section="testimonios" onclick="toggleMobileMenu()" class="nav-spy-link px-3 py-2 rounded-lg text-xs font-bold uppercase text-on-surface-variant text-center bg-surface-container">Testimonios</a>
+                <a href="#faq" data-section="faq" onclick="toggleMobileMenu()" class="nav-spy-link col-span-2 px-3 py-2 rounded-lg text-xs font-bold uppercase text-on-surface-variant text-center bg-surface-container">Preguntas Frecuentes</a>
+            </div>
+            <div class="pt-2 border-t border-surface-container-highest flex gap-2">
+                <button onclick="toggleMobileMenu(); openModal('modal-driver-portal')" class="flex-1 py-2.5 rounded-xl bg-secondary/15 border border-secondary/40 text-secondary text-xs font-bold uppercase flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px]">local_taxi</span> Soy Conductor
+                </button>
+                <button onclick="toggleMobileMenu(); openModal('modal-operator-login')" class="flex-1 py-2.5 rounded-xl bg-surface-container-high border border-surface-variant text-white text-xs font-bold uppercase flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-primary">lock</span> Acceso Central
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full pt-16">
+        <!-- FRANJA SUPERIOR COMERCIAL -->
+        <div class="w-full bg-surface-container-lowest border-b border-surface-container-high px-4 py-2">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+                    <span class="font-bold uppercase tracking-wider text-secondary">Atención inmediata 24/7 en Fusagasugá</span>
+                    <span class="hidden sm:inline text-on-surface-variant">•</span>
+                    <span class="hidden sm:inline text-on-surface-variant">Sin tarifas dinámicas por lluvia ni recargos ocultos</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="openModal('modal-driver-portal')" class="text-primary hover:underline font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">verified</span> ¿Tienes vehículo? Trabaja con nosotros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 1: HERO COMERCIAL + COTIZADOR INTERACTIVO DE TARIFAS -->
+        <section id="inicio" class="spy-section relative px-4 sm:px-6 lg:px-8 py-12 lg:py-20 overflow-hidden bg-gradient-to-b from-surface via-surface to-surface-container-lowest">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                
+                <!-- Columna Izquierda: Propuesta de Valor para el Pasajero -->
+                <div class="lg:col-span-6 flex flex-col gap-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-container/15 border border-primary-container/40 rounded-full w-max">
+                        <span class="material-symbols-outlined text-primary text-[18px]">shield_person</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-primary">Movilidad Segura en la Ciudad Jardín</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h1 class="font-display-hero text-4xl sm:text-5xl lg:text-[52px] font-black uppercase italic tracking-tight text-white leading-[1.06]">
+                            Pide tu Halcón por <span class="text-secondary underline decoration-secondary/40 decoration-4">WhatsApp</span> en segundos
+                        </h1>
+                        <p class="text-base sm:text-lg text-on-surface-variant max-w-xl leading-relaxed">
+                            Olvídate de esperar en la calle o descargar aplicaciones pesadas. Escríbenos tu ubicación en Fusagasugá, conoce el precio exacto de antemano y viaja con conductores locales verificados.
+                        </p>
+                    </div>
+
+                    <!-- Flujo Visual Limpio en 3 Pasos -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                        <div class="bg-surface-container p-3.5 rounded-2xl border border-surface-container-highest flex items-start gap-3">
+                            <span class="w-7 h-7 rounded-lg bg-secondary/20 text-secondary font-black text-xs flex items-center justify-center shrink-0">1</span>
+                            <div>
+                                <p class="font-headline-sm text-xs font-bold uppercase text-white">Pide por WhatsApp</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Envía tu barrio de origen y destino al bot o central.</p>
+                            </div>
+                        </div>
+                        <div class="bg-surface-container p-3.5 rounded-2xl border border-surface-container-highest flex items-start gap-3">
+                            <span class="w-7 h-7 rounded-lg bg-primary-container/30 text-primary font-black text-xs flex items-center justify-center shrink-0">2</span>
+                            <div>
+                                <p class="font-headline-sm text-xs font-bold uppercase text-white">Llega tu Halcón</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Recibe placa, nombre del conductor y tiempo (3-6 min).</p>
+                            </div>
+                        </div>
+                        <div class="bg-surface-container p-3.5 rounded-2xl border border-surface-container-highest flex items-start gap-3">
+                            <span class="w-7 h-7 rounded-lg bg-tertiary/20 text-tertiary font-black text-xs flex items-center justify-center shrink-0">3</span>
+                            <div>
+                                <p class="font-headline-sm text-xs font-bold uppercase text-white">Paga Seguro</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Tarifa fija en Efectivo, Nequi o Daviplata sin sorpresas.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción Principal -->
+                    <div class="flex flex-wrap items-center gap-3 pt-2">
+                        <button onclick="toggleWhatsAppSim()" class="btn-interact flex items-center justify-center gap-2.5 px-7 py-4 bg-primary-container hover:bg-red-700 text-white font-headline-sm text-sm font-black uppercase italic tracking-wider rounded-2xl shadow-[0_0_25px_rgba(200,16,46,0.4)]">
+                            <span class="material-symbols-outlined text-[20px]">chat</span>
+                            <span>Probar Bot de WhatsApp Aquí</span>
+                        </button>
+                        <a href="https://wa.me/573108009999?text=Hola%20Halcones,%20deseo%20solicitar%20un%20veh%C3%ADculo%20en%20Fusagasug%C3%A1" target="_blank" rel="noopener noreferrer" class="btn-interact flex items-center justify-center gap-2 px-6 py-4 bg-surface-container-high hover:bg-surface-container-highest border border-surface-variant text-white font-headline-sm text-xs font-bold uppercase tracking-wider rounded-2xl">
+                            <span class="material-symbols-outlined text-secondary text-[18px]">open_in_new</span>
+                            <span>Abrir WhatsApp Real</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Cotizador Interactivo de Tarifas de Fusagasugá -->
+                <div class="lg:col-span-6 w-full">
+                    <div class="bg-surface-container rounded-3xl p-6 sm:p-7 shadow-2xl border border-surface-container-highest relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-container via-primary to-secondary"></div>
+
+                        <div class="flex items-center justify-between mb-5">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-secondary block">Tarifador Oficial Regulado</span>
+                                <h2 class="font-headline-sm text-xl font-black uppercase text-white italic">Cotiza tu Viaje al Instante</h2>
+                            </div>
+                            <div class="w-11 h-11 rounded-2xl bg-primary-container/20 border border-primary-container/40 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-2xl">calculate</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- Selector Origen -->
+                            <div>
+                                <label for="quote-origin" class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">¿Dónde te recogemos? (Origen)</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined text-secondary text-[18px] absolute left-3.5 top-1/2 -translate-y-1/2">trip_origin</span>
+                                    <select id="quote-origin" onchange="calculateQuote()" class="w-full bg-surface-container-lowest border border-surface-variant rounded-xl py-3 pl-10 pr-4 text-sm font-bold text-white focus:outline-none focus:border-secondary">
+                                        <option value="Centro (Parque Principal / Cra 6)" data-zone="urbano">Centro (Parque Principal / Cra 6)</option>
+                                        <option value="Barrio Manila (Sector Norte)" data-zone="urbano">Barrio Manila (Sector Norte)</option>
+                                        <option value="Barrio Balmoral (Clínica / Comercio)" data-zone="urbano">Barrio Balmoral (Clínica / Comercio)</option>
+                                        <option value="Barrio Pekín (Sector Sur)" data-zone="urbano">Barrio Pekín (Sector Sur)</option>
+                                        <option value="Barrio Coburgo (Zona Educativa)" data-zone="urbano">Barrio Coburgo (Zona Educativa)</option>
+                                        <option value="Fusacatán / Ebenezer" data-zone="urbano">Fusacatán / Ebenezer</option>
+                                        <option value="La Pampa / Terminal de Transportes" data-zone="periferico">La Pampa / Terminal de Transportes</option>
+                                        <option value="Corredor Turístico Chinauta" data-zone="rural">Corredor Turístico Chinauta</option>
+                                        <option value="Vereda La Aguadita" data-zone="rural">Vereda La Aguadita</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Selector Destino -->
+                            <div>
+                                <label for="quote-dest" class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">¿Hacia dónde vas? (Destino)</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined text-primary text-[18px] absolute left-3.5 top-1/2 -translate-y-1/2">location_on</span>
+                                    <select id="quote-dest" onchange="calculateQuote()" class="w-full bg-surface-container-lowest border border-surface-variant rounded-xl py-3 pl-10 pr-4 text-sm font-bold text-white focus:outline-none focus:border-primary">
+                                        <option value="Barrio Manila (Calle 18 #4-12)" data-zone="urbano" selected>Barrio Manila (Calle 18 #4-12)</option>
+                                        <option value="Centro (Parque Principal / Éxito)" data-zone="urbano">Centro (Parque Principal / Éxito)</option>
+                                        <option value="Barrio Balmoral (Hospital San Rafael)" data-zone="urbano">Barrio Balmoral (Hospital San Rafael)</option>
+                                        <option value="Barrio Pekín (Carrera 1)" data-zone="urbano">Barrio Pekín (Carrera 1)</option>
+                                        <option value="Barrio Coburgo (Universidad)" data-zone="urbano">Barrio Coburgo (Universidad)</option>
+                                        <option value="Fusacatán (Avenida Las Palmas)" data-zone="urbano">Fusacatán (Avenida Las Palmas)</option>
+                                        <option value="La Pampa / CC Avenida" data-zone="periferico">La Pampa / CC Avenida</option>
+                                        <option value="Chinauta (Condominios / Ecoparque)" data-zone="rural">Chinauta (Condominios / Ecoparque)</option>
+                                        <option value="Vereda La Aguadita" data-zone="rural">Vereda La Aguadita</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Requerimiento Especial (Conecta con Filtro Humano de la Consola) -->
+                            <div>
+                                <label for="quote-special" class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Tipo de Servicio / Requerimiento</label>
+                                <select id="quote-special" onchange="calculateQuote()" class="w-full bg-surface-container-lowest border border-surface-variant rounded-xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:border-secondary">
+                                    <option value="ESTANDAR">Auto Estándar (1-4 Pasajeros • Despacho IA)</option>
+                                    <option value="BAUL_GRANDE">Con Baúl Grande / Mercado (Asignación Manual)</option>
+                                    <option value="MASCOTA">Viaje Pet-Friendly con Mascota (Asignación Manual)</option>
+                                    <option value="ENCARGO_PIN">Encargo / Mensajería con Código PIN</option>
+                                </select>
+                            </div>
+
+                            <!-- Resultado de la Cotización -->
+                            <div class="bg-surface-container-lowest rounded-2xl p-4 border border-surface-container-highest flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant block">Tarifa Fija Garantizada</span>
+                                    <div class="flex items-baseline gap-1.5 mt-0.5">
+                                        <span id="quote-price-display" class="font-headline-lg text-3xl font-black text-secondary">$8.000</span>
+                                        <span class="font-label-telemetry text-xs text-secondary font-bold">COP</span>
+                                    </div>
+                                    <span id="quote-mode-badge" class="inline-block mt-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-secondary/15 text-secondary">Despacho Automático IA (30s)</span>
+                                </div>
+                                <div class="text-right">
+                                    <span id="quote-eta-display" class="font-label-telemetry text-sm font-bold text-white block">ETA: 4 min</span>
+                                    <span id="quote-dist-display" class="text-xs text-on-surface-variant block mt-0.5">Distancia: 2.8 km</span>
+                                    <span class="text-[10px] text-tertiary font-bold uppercase block mt-1">Efectivo / Nequi</span>
+                                </div>
+                            </div>
+
+                            <!-- Botón para lanzar la solicitud al ecosistema -->
+                            <button onclick="requestFromQuote()" class="btn-interact w-full py-4 rounded-2xl bg-secondary hover:bg-emerald-400 text-black font-headline-sm text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(78,222,163,0.3)]">
+                                <span class="material-symbols-outlined text-[20px]">send</span>
+                                <span>Solicitar Este Viaje por WhatsApp Bot</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: SERVICIOS Y TARIFAS CLARAS (#servicios) -->
+        <section id="servicios" class="spy-section w-full px-4 sm:px-6 lg:px-8 py-16 bg-surface">
+            <div class="max-w-7xl mx-auto flex flex-col gap-10">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-primary block mb-1">Nuestras Modalidades</span>
+                        <h2 class="font-headline-lg text-3xl font-black uppercase italic text-white">Servicios y Tarifas Claras en Fusagasugá</h2>
+                    </div>
+                    <p class="text-sm text-on-surface-variant max-w-md">
+                        Conoce nuestras tarifas base reguladas antes de subirte al vehículo. Sin cobros sorpresivos ni taxímetros alterados.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Tarjeta 1 -->
+                    <div class="bg-surface-container-low hover:bg-surface-container rounded-3xl p-6 border border-surface-container-highest flex flex-col justify-between transition-all">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-primary-container/20 text-primary flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[28px]">directions_car</span>
+                                </div>
+                                <span class="font-label-telemetry text-xs font-bold px-3 py-1 rounded-full bg-surface-container-highest text-secondary">Desde $7.500 COP</span>
+                            </div>
+                            <h3 class="font-headline-md text-xl font-black uppercase italic text-white mb-2">Carrera Urbana Estándar</h3>
+                            <p class="text-sm text-on-surface-variant mb-4">
+                                Traslados rápidos punto a punto entre barrios del casco urbano (Centro, Manila, Balmoral, Pekín, Coburgo, Fusacatán).
+                            </p>
+                            <ul class="space-y-2 text-xs text-on-surface-variant mb-6">
+                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm">check_circle</span> Asignación satelital en menos de 30 segundos</li>
+                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm">check_circle</span> Vehículos 4 puertas limpios y verificados</li>
+                            </ul>
+                        </div>
+                        <button onclick="prefillAndOpenBot('Centro (Parque Principal / Cra 6)', 'Barrio Manila (Calle 18 #4-12)', 'ESTANDAR')" class="btn-interact w-full py-3.5 rounded-xl bg-surface-container-high hover:bg-primary-container text-white font-headline-sm text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                            <span>Pedir Auto Urbano</span>
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </button>
+                    </div>
+
+                    <!-- Tarjeta 2 -->
+                    <div class="bg-surface-container-low hover:bg-surface-container rounded-3xl p-6 border border-surface-container-highest flex flex-col justify-between transition-all">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-tertiary/20 text-tertiary flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[28px]">luggage</span>
+                                </div>
+                                <span class="font-label-telemetry text-xs font-bold px-3 py-1 rounded-full bg-surface-container-highest text-tertiary">Desde $9.000 COP</span>
+                            </div>
+                            <h3 class="font-headline-md text-xl font-black uppercase italic text-white mb-2">Servicio Especial y Rural</h3>
+                            <p class="text-sm text-on-surface-variant mb-4">
+                                ¿Llevas mercado con baúl amplio, viajas con tu mascota o vas hacia Chinauta, La Aguadita o veredas? Un despachador humano selecciona el auto ideal.
+                            </p>
+                            <ul class="space-y-2 text-xs text-on-surface-variant mb-6">
+                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary text-sm">check_circle</span> Atención personalizada por operador en consola</li>
+                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary text-sm">check_circle</span> Cobertura completa a Chinauta y corredor vial</li>
+                            </ul>
+                        </div>
+                        <button onclick="prefillAndOpenBot('Centro (Parque Principal / Cra 6)', 'Chinauta (Condominios / Ecoparque)', 'BAUL_GRANDE')" class="btn-interact w-full py-3.5 rounded-xl bg-surface-container-high hover:bg-primary-container text-white font-headline-sm text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                            <span>Solicitar Servicio Especial</span>
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </button>
+                    </div>
+
+                    <!-- Tarjeta 3 -->
+                    <div class="bg-surface-container-low hover:bg-surface-container rounded-3xl p-6 border border-surface-container-highest flex flex-col justify-between transition-all">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-secondary/20 text-secondary flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[28px]">local_shipping</span>
+                                </div>
+                                <span class="font-label-telemetry text-xs font-bold px-3 py-1 rounded-full bg-surface-container-highest text-secondary">Desde $8.500 COP</span>
+                            </div>
+                            <h3 class="font-headline-md text-xl font-black uppercase italic text-white mb-2">Encargos y Diligencias</h3>
+                            <p class="text-sm text-on-surface-variant mb-4">
+                                Envía llaves, paquetes, medicamentos o compras con entrega protegida mediante código PIN de seguridad de 4 dígitos.
+                            </p>
+                            <ul class="space-y-2 text-xs text-on-surface-variant mb-6">
+                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm">check_circle</span> Entrega verificada únicamente con PIN</li>
+                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm">check_circle</span> Trazabilidad completa en bitácora central</li>
+                            </ul>
+                        </div>
+                        <button onclick="prefillAndOpenBot('Barrio Balmoral (Clínica / Comercio)', 'Barrio Coburgo (Zona Educativa)', 'ENCARGO_PIN')" class="btn-interact w-full py-3.5 rounded-xl bg-surface-container-high hover:bg-primary-container text-white font-headline-sm text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                            <span>Pedir Mensajería Segura</span>
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: COBERTURA EN FUSAGASUGÁ (#cobertura) -->
+        <section id="cobertura" class="spy-section w-full bg-surface-container-lowest px-4 sm:px-6 lg:px-8 py-16 border-y border-surface-container-high">
+            <div class="max-w-7xl mx-auto flex flex-col gap-8">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-secondary block mb-1">Presencia Local</span>
+                        <h2 class="font-headline-lg text-3xl font-black uppercase italic text-white">Cobertura Total en las 6 Comunas y Corregimientos</h2>
+                    </div>
+                    <span class="font-label-telemetry text-xs text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-lg border border-surface-variant">
+                        TIEMPO PROMEDIO DE ARRIBO: 3 A 6 MINUTOS
+                    </span>
+                </div>
+
+                <!-- Grid de Sectores Interactivos (Al hacer clic pre-llena el cotizador) -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+                    <button onclick="selectCoverageSector('Barrio Manila (Calle 18 #4-12)')" class="btn-interact text-left bg-surface-container hover:bg-surface-container-high p-4 rounded-2xl border border-surface-container-highest">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-headline-sm text-sm font-bold text-white">Manila</span>
+                            <span class="material-symbols-outlined text-secondary text-[18px]">location_on</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant block">Norte • $7.500 - $8.000</span>
+                    </button>
+                    <button onclick="selectCoverageSector('Barrio Coburgo (Universidad)')" class="btn-interact text-left bg-surface-container hover:bg-surface-container-high p-4 rounded-2xl border border-surface-container-highest">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-headline-sm text-sm font-bold text-white">Coburgo</span>
+                            <span class="material-symbols-outlined text-secondary text-[18px]">location_on</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant block">U. Cundinamarca • $7.500</span>
+                    </button>
+                    <button onclick="selectCoverageSector('Barrio Balmoral (Hospital San Rafael)')" class="btn-interact text-left bg-surface-container hover:bg-surface-container-high p-4 rounded-2xl border border-surface-container-highest">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-headline-sm text-sm font-bold text-white">Balmoral</span>
+                            <span class="material-symbols-outlined text-secondary text-[18px]">location_on</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant block">Hospital / Clínicas • $8.000</span>
+                    </button>
+                    <button onclick="selectCoverageSector('Barrio Pekín (Carrera 1)')" class="btn-interact text-left bg-surface-container hover:bg-surface-container-high p-4 rounded-2xl border border-surface-container-highest">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-headline-sm text-sm font-bold text-white">Pekín</span>
+                            <span class="material-symbols-outlined text-secondary text-[18px]">location_on</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant block">Comuna Sur • $8.000</span>
+                    </button>
+                    <button onclick="selectCoverageSector('Centro (Parque Principal / Éxito)')" class="btn-interact text-left bg-surface-container hover:bg-surface-container-high p-4 rounded-2xl border border-surface-container-highest">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-headline-sm text-sm font-bold text-white">Centro</span>
+                            <span class="material-symbols-outlined text-secondary text-[18px]">location_on</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant block">Zona Bancaria • $7.500</span>
+                    </button>
+                    <button onclick="selectCoverageSector('Fusacatán (Avenida Las Palmas)')" class="btn-interact text-left bg-surface-container hover:bg-surface-container-high p-4 rounded-2xl border border-surface-container-highest">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-headline-sm text-sm font-bold text-white">Fusacatán</span>
+                            <span class="material-symbols-outlined text-secondary text-[18px]">location_on</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant block">Sector Oriental • $8.000</span>
+                    </button>
+                    <button onclick="selectCoverageSector('Chinauta (Condominios / Ecoparque)')" class="btn-interact text-left bg-surface-container hover:bg-surface-container-high p-4 rounded-2xl border border-tertiary/40">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-headline-sm text-sm font-bold text-tertiary">Chinauta</span>
+                            <span class="material-symbols-outlined text-tertiary text-[18px]">wb_sunny</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant block">Turístico • $25.000</span>
+                    </button>
+                </div>
+
+                <!-- Banner Trabaja con Nosotros (Acceso Conductores) -->
+                <div class="bg-gradient-to-r from-surface-container-high via-surface-container to-surface-container-high rounded-3xl p-6 sm:p-8 border border-secondary/30 flex flex-col lg:flex-row items-center justify-between gap-6">
+                    <div class="flex items-start sm:items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-secondary/20 border border-secondary/40 flex items-center justify-center shrink-0 text-secondary">
+                            <span class="material-symbols-outlined text-3xl">directions_car</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-secondary">Convocatoria Abierta en Fusagasugá</span>
+                            <h3 class="font-headline-md text-xl sm:text-2xl font-black uppercase italic text-white">¿Tienes vehículo? Trabaja con Halcones</h3>
+                            <p class="text-sm text-on-surface-variant mt-1 max-w-2xl">
+                                Conéctate a nuestra PWA para conductores, recibe carreras automáticas por cercanía, controla tus metas financieras del día y descarga tus reportes en PDF.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full lg:w-auto">
+                        <button onclick="openModal('modal-driver-portal')" class="btn-interact flex-1 lg:flex-initial px-5 py-3.5 rounded-xl bg-surface-container-lowest border border-secondary/40 text-secondary font-headline-sm text-xs font-bold uppercase tracking-wider whitespace-nowrap">
+                            Ver Requisitos e Instalar App
+                        </button>
+                        <a href="3_conductor.html" class="btn-interact flex-1 lg:flex-initial px-5 py-3.5 rounded-xl bg-secondary text-black font-headline-sm text-xs font-black uppercase tracking-wider text-center whitespace-nowrap shadow-[0_0_20px_rgba(78,222,163,0.3)]">
+                            Abrir PWA Conductor
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: TESTIMONIOS REALES (#testimonios) -->
+        <section id="testimonios" class="spy-section w-full px-4 sm:px-6 lg:px-8 py-16 bg-surface">
+            <div class="max-w-7xl mx-auto flex flex-col gap-10">
+                <div class="text-center max-w-2xl mx-auto">
+                    <span class="text-xs font-bold uppercase tracking-widest text-primary block mb-1">Confianza Ciudadana</span>
+                    <h2 class="font-headline-lg text-3xl font-black uppercase italic text-white">Lo que Dicen Nuestros Pasajeros en Fusa</h2>
+                    <p class="text-sm text-on-surface-variant mt-2">Más de 1.400 servicios semanales respaldan nuestra puntualidad y trato amable.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <article class="bg-surface-container-low p-6 rounded-3xl border border-surface-container-highest flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-1 text-tertiary text-sm mb-3">★★★★★</div>
+                            <p class="text-sm text-on-surface leading-relaxed italic">
+                                “Salgo del Hospital San Rafael en Balmoral en turno nocturno y en menos de 4 minutos ya tengo el vehículo en la puerta. Me encanta que me mandan la placa y nombre por WhatsApp.”
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 mt-6 pt-4 border-t border-surface-container-highest">
+                            <div class="w-10 h-10 rounded-full bg-primary-container/30 text-primary font-bold flex items-center justify-center text-xs">MC</div>
+                            <div>
+                                <p class="text-xs font-bold text-white">Dra. Marcela Cortés</p>
+                                <p class="text-[11px] text-on-surface-variant">Usuaria frecuente • Barrio Balmoral</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="bg-surface-container-low p-6 rounded-3xl border border-surface-container-highest flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-1 text-tertiary text-sm mb-3">★★★★★</div>
+                            <p class="text-sm text-on-surface leading-relaxed italic">
+                                “Cuando hacemos mercado en el Éxito del Centro pedimos un Halcón con baúl grande. Nunca nos cobran de más aunque esté lloviendo fuerte en Fusagasugá.”
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 mt-6 pt-4 border-t border-surface-container-highest">
+                            <div class="w-10 h-10 rounded-full bg-secondary/20 text-secondary font-bold flex items-center justify-center text-xs">RG</div>
+                            <div>
+                                <p class="text-xs font-bold text-white">Ricardo Gómez y Familia</p>
+                                <p class="text-[11px] text-on-surface-variant">Vecinos • Barrio Manila</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="bg-surface-container-low p-6 rounded-3xl border border-surface-container-highest flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-1 text-tertiary text-sm mb-3">★★★★★</div>
+                            <p class="text-sm text-on-surface leading-relaxed italic">
+                                “Tengo una tienda de repuestos y envío pedidos urgentes con el servicio de encargos. El código PIN me da total tranquilidad de que entregan en las manos correctas.”
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 mt-6 pt-4 border-t border-surface-container-highest">
+                            <div class="w-10 h-10 rounded-full bg-tertiary/20 text-tertiary font-bold flex items-center justify-center text-xs">DP</div>
+                            <div>
+                                <p class="text-xs font-bold text-white">Diana Patricia Rojas</p>
+                                <p class="text-[11px] text-on-surface-variant">Comerciante • Sector Centro</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 5: PREGUNTAS FRECUENTES (#faq) -->
+        <section id="faq" class="spy-section w-full bg-surface-container-lowest px-4 sm:px-6 lg:px-8 py-16 border-t border-surface-container-high">
+            <div class="max-w-4xl mx-auto flex flex-col gap-8">
+                <div class="text-center">
+                    <span class="text-xs font-bold uppercase tracking-widest text-primary block mb-1">Preguntas Frecuentes</span>
+                    <h2 class="font-headline-lg text-3xl font-black uppercase italic text-white">Todo lo que Necesitas Saber</h2>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="bg-surface-container rounded-2xl border border-surface-container-highest overflow-hidden">
+                        <button onclick="toggleFaq(this)" class="w-full p-5 flex items-center justify-between text-left font-headline-sm text-sm uppercase text-white focus:outline-none">
+                            <span>¿Cómo solicito o cancelo una carrera desde WhatsApp?</span>
+                            <span class="material-symbols-outlined text-primary transition-transform duration-200 rotate-180">expand_more</span>
+                        </button>
+                        <div class="px-5 pb-5 text-sm text-on-surface-variant leading-relaxed">
+                            Escribe tu dirección de recogida y destino en nuestro chat de WhatsApp (puedes probar el simulador en vivo con el botón flotante de esta página). Nuestro sistema asigna el móvil más cercano en menos de 30 segundos. Si necesitas cancelar, basta con enviar la palabra <strong>“Cancelar”</strong> y el sistema libera al conductor de inmediato sin penalidad.
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container rounded-2xl border border-surface-container-highest overflow-hidden">
+                        <button onclick="toggleFaq(this)" class="w-full p-5 flex items-center justify-between text-left font-headline-sm text-sm uppercase text-white focus:outline-none">
+                            <span>¿Las tarifas cambian cuando llueve o en horas pico?</span>
+                            <span class="material-symbols-outlined text-primary transition-transform duration-200">expand_more</span>
+                        </button>
+                        <div class="px-5 pb-5 text-sm text-on-surface-variant leading-relaxed hidden">
+                            No. En Halcones manejamos un tabulador fijo por zonas de Fusagasugá ($7.500 a $9.000 en casco urbano y tarifas pactadas hacia Chinauta o veredas). Nunca aplicamos multiplicadores dinámicos sorpresivos.
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container rounded-2xl border border-surface-container-highest overflow-hidden">
+                        <button onclick="toggleFaq(this)" class="w-full p-5 flex items-center justify-between text-left font-headline-sm text-sm uppercase text-white focus:outline-none">
+                            <span>¿Qué pasa si necesito un carro con baúl grande o voy para Chinauta?</span>
+                            <span class="material-symbols-outlined text-primary transition-transform duration-200">expand_more</span>
+                        </button>
+                        <div class="px-5 pb-5 text-sm text-on-surface-variant leading-relaxed hidden">
+                            Cuando tu solicitud incluye requerimientos especiales (baúl despejado, viaje a Chinauta, silla o mascota), nuestro filtro inteligente pasa tu orden directamente al Operador de Turno en la Central para que elija manualmente el vehículo más adecuado.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER COMPLETO CON ACCESOS A CONDUCTOR Y OPERADOR -->
+    <footer class="w-full bg-surface border-t border-surface-container-highest py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-surface-container-high">
+            <div class="md:col-span-2 space-y-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-[18px]">flight_takeoff</span>
+                    </div>
+                    <span class="font-headline-sm text-lg font-black uppercase text-white tracking-wider">Halcones Movilidad</span>
+                    <span class="px-2 py-0.5 bg-secondary/15 text-secondary text-[10px] font-bold uppercase rounded">Activo 24/7</span>
+                </div>
+                <p class="text-xs text-on-surface-variant max-w-md leading-relaxed">
+                    Seguridad, confianza y compromiso en el transporte público e intermunicipal de Fusagasugá y la provincia del Sumapaz.
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs font-bold uppercase tracking-wider text-white">Líneas de Atención</p>
+                <p class="font-label-telemetry text-xs text-secondary block">WhatsApp: (+57) 310 800 9999</p>
+                <p class="font-label-telemetry text-xs text-on-surface-variant block">Fijo Central: (601) 867 0000</p>
+            </div>
+
+            <div class="space-y-2.5">
+                <p class="text-xs font-bold uppercase tracking-wider text-white">Accesos del Ecosistema</p>
+                <div class="flex flex-col gap-2">
+                    <button onclick="openModal('modal-driver-portal')" class="text-left text-xs text-secondary hover:underline font-bold flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[15px]">local_taxi</span> Soy Conductor / Instalar PWA
+                    </button>
+                    <button onclick="openModal('modal-operator-login')" class="text-left text-xs text-on-surface-variant hover:text-white font-bold flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[15px] text-primary">lock</span> Acceso Operador / Central
+                    </button>
+                    <a href="4_detalle.html" class="text-left text-xs text-on-surface-variant hover:text-white flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[15px]">receipt_long</span> Auditoría y Bitácora de Viajes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-on-surface-variant gap-2">
+            <p>© 2026 Halcones Movilidad Fusagasugá. Todos los derechos reservados.</p>
+            <span class="font-mono text-[11px] text-secondary">Ecosistema Sincronizado en Tiempo Real</span>
+        </div>
+    </footer>
+
+    <!-- BOTÓN FLOTANTE DE WHATSAPP Y SIMULADOR EN VIVO -->
+    <button onclick="toggleWhatsAppSim()" class="btn-interact fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-black font-headline-sm text-xs font-black uppercase tracking-wider px-5 py-3.5 shadow-[0_10px_30px_rgba(37,211,102,0.45)]">
+        <span class="material-symbols-outlined text-[22px]">chat</span>
+        <span>WhatsApp Halcones</span>
+        <span id="wa-active-pill" class="hidden w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
+    </button>
+
+    <!-- VENTANA FLOTANTE: SIMULADOR INTERACTIVO DE WHATSAPP BOT -->
+    <div id="whatsapp-sim-window" class="fixed bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[390px] rounded-3xl border border-surface-container-highest bg-surface-container shadow-[0_20px_60px_rgba(0,0,0,0.75)] overflow-hidden hidden flex-col">
+        <!-- Header estilo WhatsApp -->
+        <div class="bg-[#075E54] px-4 py-3.5 flex items-center justify-between text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center relative">
+                    <span class="material-symbols-outlined text-secondary">smart_toy</span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-secondary absolute bottom-0 right-0 ring-2 ring-[#075E54]"></span>
+                </div>
+                <div>
+                    <p class="font-headline-sm text-xs font-black uppercase tracking-wider">Halcones Bot Fusa</p>
+                    <p class="text-[10px] text-emerald-200">En línea • Despacho IA conectado a Central</p>
+                </div>
+            </div>
+            <button onclick="toggleWhatsAppSim()" class="p-1.5 rounded-lg hover:bg-white/10 text-white" aria-label="Cerrar chat">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+
+        <!-- Historial del Chat -->
+        <div id="wa-chat-messages" class="p-4 h-72 overflow-y-auto space-y-3 bg-[#0b141a] text-xs">
+            <div class="bg-[#1f2c34] text-gray-100 p-3 rounded-2xl rounded-tl-sm max-w-[88%] shadow">
+                <p class="font-bold text-secondary mb-1">🦅 ¡Hola! Soy el Bot de Halcones Fusagasugá.</p>
+                <p class="text-gray-300 leading-relaxed">Escribe tu origen y destino o usa los botones rápidos abajo para pedir un vehículo. Tu solicitud aparecerá de inmediato en la <strong>Consola Central</strong> y en la <strong>PWA del Conductor</strong>.</p>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas de Simulación -->
+        <div class="bg-surface-container-lowest px-3 py-2 border-t border-surface-container-highest flex flex-wrap gap-1.5">
+            <button onclick="sendQuickWhatsAppOrder('Cra 6 #8-32, Centro', 'Calle 18 #4-12, Barrio Manila', 8000, 'Estándar', false)" class="text-[10px] font-bold bg-surface-container-high hover:bg-secondary hover:text-black text-secondary px-2.5 py-1 rounded-lg border border-secondary/30 transition-colors">
+                ⚡ Pedir Centro → Manila ($8.000)
+            </button>
+            <button onclick="sendQuickWhatsAppOrder('Éxito Centro', 'Condominio Chinauta', 25000, 'Con baúl grande para Chinauta', true)" class="text-[10px] font-bold bg-surface-container-high hover:bg-tertiary hover:text-black text-tertiary px-2.5 py-1 rounded-lg border border-tertiary/30 transition-colors">
+                🧳 Pedir Especial (Baúl/Chinauta)
+            </button>
+            <button onclick="sendWhatsAppCancel()" class="text-[10px] font-bold bg-error-container/30 hover:bg-error text-error hover:text-black px-2.5 py-1 rounded-lg border border-error/40 transition-colors">
+                ✖ Enviar "Cancelar"
+            </button>
+        </div>
+
+        <!-- Input libre -->
+        <form onsubmit="handleWhatsAppInput(event)" class="p-2.5 bg-surface-container flex items-center gap-2 border-t border-surface-container-high">
+            <input id="wa-user-input" type="text" placeholder="Ej: De Pekín a Balmoral o escribe 'Cancelar'..." class="flex-1 bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-secondary">
+            <button type="submit" class="w-10 h-10 rounded-xl bg-[#25D366] text-black flex items-center justify-center shrink-0 font-bold hover:bg-emerald-400">
+                <span class="material-symbols-outlined text-[18px]">send</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- MODAL 1: PORTAL CONDUCTORES / INSTALACIÓN PWA (beforeinstallprompt) -->
+    <div id="modal-driver-portal" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container w-full max-w-lg rounded-3xl p-6 sm:p-7 border border-secondary/30 shadow-2xl relative">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-secondary/20 text-secondary flex items-center justify-center">
+                        <span class="material-symbols-outlined">local_taxi</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline-sm text-lg font-black uppercase text-white">Portal de Conductores Halcones</h3>
+                        <p class="text-[11px] text-secondary font-bold uppercase tracking-wider">PWA Móvil & Vinculación en Fusagasugá</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-driver-portal')" class="text-on-surface-variant hover:text-white p-1">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs text-on-surface-variant">
+                <div class="bg-surface-container-lowest p-4 rounded-2xl border border-surface-container-highest space-y-2">
+                    <p class="font-bold text-white uppercase text-[11px] tracking-wider">Requisitos para Afiliar tu Vehículo:</p>
+                    <ul class="space-y-1.5">
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm">check_circle</span> Modelo 2014 en adelante con SOAT y Técnico-Mecánica al día.</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm">check_circle</span> Licencia de conducción vigente y residente en Fusagasugá o Sumapaz.</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm">check_circle</span> Celular con datos móviles y aplicación Zello para radiofrecuencia.</li>
+                    </ul>
+                </div>
+
+                <!-- Botones de Instalación Nativa PWA + Acceso Directo -->
+                <div class="bg-secondary/10 border border-secondary/30 rounded-2xl p-4 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-white text-sm">App Conductor Halcones (PWA)</p>
+                            <p class="text-[11px] text-on-surface-variant">Instálala en tu pantalla de inicio o ingresa al turno activo (Móvil HLC-102).</p>
+                        </div>
+                        <span class="font-mono text-[10px] font-bold px-2 py-1 rounded bg-secondary text-black uppercase">v2.4 Lista</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button id="btn-pwa-install" onclick="triggerPwaInstall()" class="btn-interact py-3 px-4 rounded-xl bg-surface-container-highest hover:bg-surface-bright text-white font-headline-sm text-xs font-bold uppercase flex items-center justify-center gap-2 border border-secondary/40">
+                            <span class="material-symbols-outlined text-secondary text-[18px]">install_mobile</span>
+                            <span>Instalar en Celular</span>
+                        </button>
+                        <a href="3_conductor.html" class="btn-interact py-3 px-4 rounded-xl bg-secondary hover:bg-emerald-400 text-black font-headline-sm text-xs font-black uppercase flex items-center justify-center gap-2 shadow-lg">
+                            <span class="material-symbols-outlined text-[18px]">login</span>
+                            <span>Abrir App Conductor</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mini Formulario de Postulación Rápida -->
+                <form onsubmit="submitDriverRegistration(event)" class="space-y-3 pt-2 border-t border-surface-container-highest">
+                    <p class="font-bold text-white uppercase text-[11px] tracking-wider">¿Aún no estás registrado? Postúlate aquí:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <input id="reg-driver-name" type="text" required placeholder="Nombre completo" class="bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-secondary">
+                        <input id="reg-driver-plate" type="text" required placeholder="Placa (Ej: TZV-412)" class="bg-surface-container-lowest border border-surface-variant rounded-xl px-3.5 py-2.5 text-xs text-white uppercase focus:outline-none focus:border-secondary">
+                    </div>
+                    <button type="submit" class="btn-interact w-full py-3 rounded-xl bg-primary-container hover:bg-red-700 text-white font-headline-sm text-xs font-bold uppercase tracking-wider">
+                        Enviar Solicitud de Vinculación
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: LOGIN OPERADOR / CENTRAL (Redirige a 2_consola.html) -->
+    <div id="modal-operator-login" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container w-full max-w-md rounded-3xl p-6 sm:p-7 border border-primary-container/40 shadow-2xl">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-primary-container/20 text-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined">admin_panel_settings</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline-sm text-lg font-black uppercase text-white">Acceso Central Operador</h3>
+                        <p class="text-[11px] text-on-surface-variant">Consola de Despacho & Monitoreo de Flota</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-operator-login')" class="text-on-surface-variant hover:text-white p-1">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form onsubmit="handleOperatorLogin(event)" class="space-y-4">
+                <div>
+                    <label for="op-email" class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">Correo o Código de Operador</label>
+                    <input id="op-email" type="email" required value="central@halconesfusa.com" class="w-full bg-surface-container-lowest border border-surface-variant rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                </div>
+                <div>
+                    <label for="op-pass" class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">Contraseña Administrativa</label>
+                    <input id="op-pass" type="password" required value="Halcones2026*" class="w-full bg-surface-container-lowest border border-surface-variant rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                </div>
+                <div class="flex items-center justify-between text-xs text-on-surface-variant">
+                    <span class="font-mono text-[11px] text-secondary">✓ Credenciales de turno pre-cargadas</span>
+                    <button type="button" onclick="fillDemoOperator()" class="text-primary hover:underline font-bold">Restaurar Demo</button>
+                </div>
+                <button type="submit" class="btn-interact w-full py-3.5 rounded-xl bg-primary-container hover:bg-red-700 text-white font-headline-sm text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(200,16,46,0.4)]">
+                    <span class="material-symbols-outlined text-[18px]">login</span>
+                    <span>Ingresar a Consola Central (2_consola.html)</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- ARQUITECTURA MODULAR JS: STORE LOCALSTORAGE, COTIZADOR, BOT WHATSAPP Y UI -->
+    <!-- ========================================================================= -->
+    <script>
+        // 1. CAPA DE PERSISTENCIA POR DOMINIOS (Shared Ecosystem Store)
+        const HalconesStore = {
+            KEYS: {
+                FLOTA: 'halcones_flota',
+                SERVICIOS: 'halcones_servicios',
+                BALANCE: 'halcones_balance',
+                OPERATOR: 'halcones_operator_session'
+            },
+            initDefaults() {
+                if (!localStorage.getItem(this.KEYS.FLOTA)) {
+                    const defaultFleet = [
+                        { id: 'HLC-102', name: 'Julián V.', plate: 'TZV-412', vehicle: 'Renault Logan', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3368, lng: -74.3638, phone: '573114508812' },
+                        { id: 'HLC-104', name: 'Carlos M.', plate: 'KRM-883', vehicle: 'Chevrolet Sail', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3412, lng: -74.3685, phone: '573123009911' },
+                        { id: 'HLC-108', name: 'Andrés R.', plate: 'FUS-319', vehicle: 'Hyundai Grand i10', status: 'DISPONIBLE', reason: null, currentServiceId: null, lat: 4.3315, lng: -74.3590, phone: '573142201188' },
+                        { id: 'HLC-115', name: 'Jorge E.', plate: 'BGT-504', vehicle: 'Kia Picanto', status: 'EN_SERVICIO', reason: null, currentServiceId: 'HLC-9380', lat: 4.3390, lng: -74.3610, phone: '573158903344' },
+                        { id: 'HLC-121', name: 'Luis P.', plate: 'LFM-721', vehicle: 'Nissan March', status: 'FUERA_SERVICIO', reason: 'Avería Mecánica (Varado)', currentServiceId: null, lat: 4.3295, lng: -74.3670, phone: '573187705566' }
+                    ];
+                    localStorage.setItem(this.KEYS.FLOTA, JSON.stringify(defaultFleet));
+                }
+                if (!localStorage.getItem(this.KEYS.SERVICIOS)) {
+                    const now = new Date();
+                    const initialServices = [
+                        {
+                            id: 'HLC-9421',
+                            origin: 'Cra 6 #8-32, Centro (Éxito)',
+                            dest: 'Calle 18 #4-12, Barrio Manila',
+                            price: 8000,
+                            dist: '2.8 km',
+                            duration: '8 min',
+                            customerName: 'Camila Méndez',
+                            customerPhone: '573105554321',
+                            notes: 'Estándar • Despacho Automático IA',
+                            requiresManual: false,
+                            status: 'AUTOMATIC_DISPATCH',
+                            timerSeconds: 30,
+                            driverCode: null,
+                            driverName: null,
+                            driverPlate: null,
+                            paymentMethod: 'Pendiente',
+                            createdAt: new Date(now.getTime() - 25000).toISOString(),
+                            assignedAt: null,
+                            startedAt: null,
+                            completedAt: null,
+                            lat: 4.3422,
+                            lng: -74.3691
+                        },
+                        {
+                            id: 'HLC-9419',
+                            origin: 'Clínica Belén, Barrio Balmoral',
+                            dest: 'Condominio El Encanto, Vía Chinauta',
+                            price: 25000,
+                            dist: '14.5 km',
+                            duration: '22 min',
+                            customerName: 'Hernando Pardo',
+                            customerPhone: '573154449876',
+                            notes: 'Con baúl grande y 3 maletas • Para Chinauta',
+                            requiresManual: true,
+                            status: 'MANUAL_REQUIRED',
+                            timerSeconds: 0,
+                            driverCode: null,
+                            driverName: null,
+                            driverPlate: null,
+                            paymentMethod: 'Pendiente',
+                            createdAt: new Date(now.getTime() - 120000).toISOString(),
+                            assignedAt: null,
+                            startedAt: null,
+                            completedAt: null,
+                            lat: 4.2980,
+                            lng: -74.4120
+                        },
+                        {
+                            id: 'HLC-9380',
+                            origin: 'Universidad de Cundinamarca, Coburgo',
+                            dest: 'Carrera 3 #14-20, Barrio Pekín',
+                            price: 8000,
+                            dist: '3.4 km',
+                            duration: '11 min',
+                            customerName: 'Sebastián Mora',
+                            customerPhone: '573201112233',
+                            notes: 'Estándar',
+                            requiresManual: false,
+                            status: 'EN_VIAJE',
+                            timerSeconds: 0,
+                            driverCode: 'HLC-115',
+                            driverName: 'Jorge E.',
+                            driverPlate: 'BGT-504',
+                            paymentMethod: 'Pendiente',
+                            createdAt: new Date(now.getTime() - 540000).toISOString(),
+                            assignedAt: new Date(now.getTime() - 510000).toISOString(),
+                            startedAt: new Date(now.getTime() - 360000).toISOString(),
+                            completedAt: null,
+                            lat: 4.3310,
+                            lng: -74.3560
+                        },
+                        {
+                            id: 'HLC-9355',
+                            origin: 'Parque Principal, Centro',
+                            dest: 'Hospital San Rafael, Balmoral',
+                            price: 7500,
+                            dist: '2.1 km',
+                            duration: '7 min',
+                            customerName: 'Dra. Marcela Cortés',
+                            customerPhone: '573119998877',
+                            notes: 'Estándar',
+                            requiresManual: false,
+                            status: 'COMPLETADO',
+                            timerSeconds: 0,
+                            driverCode: 'HLC-102',
+                            driverName: 'Julián V.',
+                            driverPlate: 'TZV-412',
+                            paymentMethod: 'Efectivo',
+                            createdAt: new Date(now.getTime() - 3600000).toISOString(),
+                            assignedAt: new Date(now.getTime() - 3570000).toISOString(),
+                            startedAt: new Date(now.getTime() - 3400000).toISOString(),
+                            completedAt: new Date(now.getTime() - 2980000).toISOString(),
+                            lat: 4.3358,
+                            lng: -74.3662
+                        }
+                    ];
+                    localStorage.setItem(this.KEYS.SERVICIOS, JSON.stringify(initialServices));
+                }
+                if (!localStorage.getItem(this.KEYS.BALANCE)) {
+                    localStorage.setItem(this.KEYS.BALANCE, JSON.stringify({
+                        efectivo: 7500,
+                        transferencia: 0,
+                        meta: 150000
+                    }));
+                }
+            },
+            getServices() {
+                try { return JSON.parse(localStorage.getItem(this.KEYS.SERVICIOS)) || []; }
+                catch (_) { return []; }
+            },
+            saveServices(list) {
+                localStorage.setItem(this.KEYS.SERVICIOS, JSON.stringify(list));
+            },
+            getFleet() {
+                try { return JSON.parse(localStorage.getItem(this.KEYS.FLOTA)) || []; }
+                catch (_) { return []; }
+            },
+            saveFleet(list) {
+                localStorage.setItem(this.KEYS.FLOTA, JSON.stringify(list));
+            }
+        };
+
+        // 2. SISTEMA DE NOTIFICACIONES TOAST Y MODALES
+        let toastTimer = null;
+        function showNotification(msg, icon = 'check_circle') {
+            const toast = document.getElementById('global-toast');
+            document.getElementById('global-toast-text').textContent = msg;
+            document.getElementById('global-toast-icon').textContent = icon;
+            toast.classList.remove('opacity-0', 'translate-y-[-12px]', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-12px]', 'pointer-events-none');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3400);
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                icon.textContent = 'close';
+            } else {
+                menu.classList.add('hidden');
+                icon.textContent = 'menu';
+            }
+        }
+
+        function toggleFaq(btn) {
+            const answer = btn.nextElementSibling;
+            const icon = btn.querySelector('.material-symbols-outlined');
+            answer.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // 3. NAVEGACIÓN FLUIDA Y SCROLL-SPY CON CLASE ACTIVA EN ROJO
+        function initScrollSpy() {
+            const links = document.querySelectorAll('.nav-spy-link');
+            const sections = document.querySelectorAll('.spy-section');
+
+            function setActiveSection(id) {
+                links.forEach(link => {
+                    if (link.dataset.section === id) {
+                        link.classList.add('nav-link-active');
+                        link.classList.remove('text-on-surface-variant');
+                    } else {
+                        link.classList.remove('nav-link-active');
+                        link.classList.add('text-on-surface-variant');
+                    }
+                });
+            }
+
+            links.forEach(link => {
+                link.addEventListener('click', () => {
+                    setActiveSection(link.dataset.section);
+                });
+            });
+
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setActiveSection(entry.target.id);
+                    }
+                });
+            }, { rootMargin: '-30% 0px -55% 0px', threshold: 0.05 });
+
+            sections.forEach(sec => observer.observe(sec));
+        }
+
+        // 4. COTIZADOR INTERACTIVO DE TARIFAS LOCALES
+        let currentQuote = {
+            origin: 'Centro (Parque Principal / Cra 6)',
+            dest: 'Barrio Manila (Calle 18 #4-12)',
+            price: 8000,
+            dist: '2.8 km',
+            eta: '4 min',
+            special: 'ESTANDAR',
+            requiresManual: false
+        };
+
+        function calculateQuote() {
+            const originSelect = document.getElementById('quote-origin');
+            const destSelect = document.getElementById('quote-dest');
+            const specialSelect = document.getElementById('quote-special');
+
+            const originZone = originSelect.options[originSelect.selectedIndex].dataset.zone;
+            const destZone = destSelect.options[destSelect.selectedIndex].dataset.zone;
+            const special = specialSelect.value;
+
+            let basePrice = 8000;
+            let dist = '2.8 km';
+            let eta = '4 min';
+            let requiresManual = false;
+
+            if (originSelect.value.includes('Chinauta') || destSelect.value.includes('Chinauta')) {
+                basePrice = 25000;
+                dist = '14.5 km';
+                eta = '6 min';
+                requiresManual = true;
+            } else if (originZone === 'rural' || destZone === 'rural') {
+                basePrice = 18000;
+                dist = '9.2 km';
+                eta = '6 min';
+                requiresManual = true;
+            } else if (originZone === 'periferico' || destZone === 'periferico') {
+                basePrice = 9000;
+                dist = '4.1 km';
+                eta = '5 min';
+            } else if (originSelect.selectedIndex === destSelect.selectedIndex) {
+                basePrice = 7500;
+                dist = '1.5 km';
+                eta = '3 min';
+            }
+
+            if (special === 'BAUL_GRANDE' || special === 'MASCOTA') {
+                basePrice += 1500;
+                requiresManual = true;
+            } else if (special === 'ENCARGO_PIN') {
+                basePrice += 1000;
+            }
+
+            currentQuote = {
+                origin: originSelect.value,
+                dest: destSelect.value,
+                price: basePrice,
+                dist,
+                eta,
+                special,
+                requiresManual
+            };
+
+            document.getElementById('quote-price-display').textContent = '$' + basePrice.toLocaleString('es-CO');
+            document.getElementById('quote-eta-display').textContent = 'ETA: ' + eta;
+            document.getElementById('quote-dist-display').textContent = 'Distancia: ' + dist;
+
+            const badge = document.getElementById('quote-mode-badge');
+            if (requiresManual) {
+                badge.textContent = 'Filtro Humano: Asignación Manual en Central';
+                badge.className = 'inline-block mt-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-tertiary/20 text-tertiary';
+            } else {
+                badge.textContent = 'Despacho Automático IA (30s)';
+                badge.className = 'inline-block mt-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-secondary/15 text-secondary';
+            }
+        }
+
+        function selectCoverageSector(sectorName) {
+            const destSelect = document.getElementById('quote-dest');
+            for (let i = 0; i < destSelect.options.length; i++) {
+                if (destSelect.options[i].value === sectorName) {
+                    destSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            calculateQuote();
+            document.getElementById('inicio').scrollIntoView({ behavior: 'smooth' });
+            showNotification(`Destino seleccionado: ${sectorName.split('(')[0].trim()}`, 'location_on');
+        }
+
+        function prefillAndOpenBot(origin, dest, special) {
+            const originSelect = document.getElementById('quote-origin');
+            const destSelect = document.getElementById('quote-dest');
+            const specialSelect = document.getElementById('quote-special');
+            for (let i = 0; i < originSelect.options.length; i++) {
+                if (originSelect.options[i].value === origin) originSelect.selectedIndex = i;
+            }
+            for (let i = 0; i < destSelect.options.length; i++) {
+                if (destSelect.options[i].value === dest) destSelect.selectedIndex = i;
+            }
+            specialSelect.value = special;
+            calculateQuote();
+            requestFromQuote();
+        }
+
+        // 5. SIMULADOR INTERACTIVO DE WHATSAPP BOT CONECTADO AL ECOSISTEMA
+        let lastCreatedServiceId = null;
+
+        function toggleWhatsAppSim(forceOpen = false) {
+            const win = document.getElementById('whatsapp-sim-window');
+            if (forceOpen || win.classList.contains('hidden')) {
+                win.classList.remove('hidden');
+                win.classList.add('flex');
+                document.getElementById('wa-user-input').focus();
+            } else {
+                win.classList.add('hidden');
+                win.classList.remove('flex');
+            }
+        }
+
+        function appendChatMessage(sender, htmlText) {
+            const box = document.getElementById('wa-chat-messages');
+            const msg = document.createElement('div');
+            if (sender === 'user') {
+                msg.className = 'bg-[#005c4b] text-white p-3 rounded-2xl rounded-tr-sm max-w-[85%] ml-auto shadow';
+            } else {
+                msg.className = 'bg-[#1f2c34] text-gray-100 p-3 rounded-2xl rounded-tl-sm max-w-[88%] shadow';
+            }
+            msg.innerHTML = htmlText;
+            box.appendChild(msg);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function requestFromQuote() {
+            toggleWhatsAppSim(true);
+            const specialLabels = {
+                ESTANDAR: 'Auto Estándar',
+                BAUL_GRANDE: 'Con baúl grande',
+                MASCOTA: 'Viaje con mascota',
+                ENCARGO_PIN: 'Encargo con PIN #4829'
+            };
+            sendQuickWhatsAppOrder(
+                currentQuote.origin,
+                currentQuote.dest,
+                currentQuote.price,
+                specialLabels[currentQuote.special] || 'Estándar',
+                currentQuote.requiresManual
+            );
+        }
+
+        function sendQuickWhatsAppOrder(origin, dest, price, notes, requiresManual) {
+            toggleWhatsAppSim(true);
+            appendChatMessage('user', `<p>Hola Halcones, necesito un servicio desde <strong>${origin}</strong> hasta <strong>${dest}</strong> (${notes}).</p>`);
+
+            const newId = 'HLC-' + Math.floor(1000 + Math.random() * 9000);
+            lastCreatedServiceId = newId;
+
+            const newService = {
+                id: newId,
+                origin,
+                dest,
+                price,
+                dist: requiresManual ? '8.4 km' : '2.9 km',
+                duration: requiresManual ? '18 min' : '9 min',
+                customerName: 'Cliente WhatsApp Web',
+                customerPhone: '573108887766',
+                notes,
+                requiresManual,
+                status: requiresManual ? 'MANUAL_REQUIRED' : 'AUTOMATIC_DISPATCH',
+                timerSeconds: requiresManual ? 0 : 30,
+                driverCode: null,
+                driverName: null,
+                driverPlate: null,
+                paymentMethod: 'Pendiente',
+                createdAt: new Date().toISOString(),
+                assignedAt: null,
+                startedAt: null,
+                completedAt: null,
+                lat: 4.3375,
+                lng: -74.3642
+            };
+
+            const services = HalconesStore.getServices();
+            services.unshift(newService);
+            HalconesStore.saveServices(services);
+
+            document.getElementById('wa-active-pill').classList.remove('hidden');
+
+            setTimeout(() => {
+                const dispatchModeText = requiresManual
+                    ? `<span class="text-tertiary font-bold">Filtro Humano Activado:</span> Tu solicitud requiere intervención del operador en consola (${notes}).`
+                    : `<span class="text-secondary font-bold">IA Asignando Automáticamente (30s):</span> Buscando el móvil más cercano en Fusagasugá.`;
+
+                appendChatMessage('bot', `
+                    <p class="font-bold text-secondary mb-1">✅ Orden #${newId} generada en el sistema</p>
+                    <p class="text-gray-200">• <strong>Origen:</strong> ${origin}<br>• <strong>Destino:</strong> ${dest}<br>• <strong>Tarifa Regulada:</strong> $${price.toLocaleString('es-CO')} COP</p>
+                    <p class="mt-2 text-[11px] text-gray-300">${dispatchModeText}</p>
+                    <div class="mt-2.5 pt-2 border-t border-white/10 flex gap-2">
+                        <a href="2_consola.html" class="px-2.5 py-1 rounded bg-primary-container text-white font-bold text-[10px] uppercase">Ver en Consola</a>
+                        <a href="3_conductor.html" class="px-2.5 py-1 rounded bg-secondary text-black font-bold text-[10px] uppercase">Ver en Conductor</a>
+                    </div>
+                `);
+                showNotification(`Orden #${newId} enviada a la Central`, 'rocket_launch');
+            }, 400);
+        }
+
+        function sendWhatsAppCancel() {
+            toggleWhatsAppSim(true);
+            appendChatMessage('user', `<p class="font-bold">Cancelar</p>`);
+
+            const services = HalconesStore.getServices();
+            const target = services.find(s =>
+                (lastCreatedServiceId && s.id === lastCreatedServiceId) ||
+                ['AUTOMATIC_DISPATCH', 'MANUAL_REQUIRED', 'OFFERED', 'EN_CAMINO', 'EN_VIAJE'].includes(s.status)
+            );
+
+            if (!target) {
+                setTimeout(() => {
+                    appendChatMessage('bot', `<p class="text-amber-300">No tienes ningún servicio activo para cancelar en este momento.</p>`);
+                }, 300);
+                return;
+            }
+
+            const prevDriver = target.driverCode;
+            target.status = 'CANCELADO_CLIENTE';
+            target.cancelReason = 'Cancelado por el cliente desde WhatsApp';
+            target.completedAt = new Date().toISOString();
+            HalconesStore.saveServices(services);
+
+            if (prevDriver) {
+                const fleet = HalconesStore.getFleet();
+                const driver = fleet.find(d => d.id === prevDriver);
+                if (driver) {
+                    driver.status = 'DISPONIBLE';
+                    driver.currentServiceId = null;
+                    HalconesStore.saveFleet(fleet);
+                }
+            }
+
+            // Emitir señal de alerta para el conductor y la consola
+            localStorage.setItem('halcones_client_cancel_alert', JSON.stringify({
+                serviceId: target.id,
+                driverCode: prevDriver || 'HLC-102',
+                timestamp: Date.now()
+            }));
+
+            setTimeout(() => {
+                appendChatMessage('bot', `
+                    <p class="font-bold text-error mb-1">🛑 Servicio #${target.id} Cancelado por Cliente</p>
+                    <p class="text-gray-300">Hemos notificado a la Consola Central y liberado automáticamente al conductor a estado <strong>DISPONIBLE</strong>.</p>
+                `);
+                showNotification(`Servicio #${target.id} cancelado desde WhatsApp`, 'cancel');
+            }, 350);
+        }
+
+        function handleWhatsAppInput(e) {
+            e.preventDefault();
+            const input = document.getElementById('wa-user-input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+
+            if (text.toLowerCase().includes('cancel')) {
+                sendWhatsAppCancel();
+                return;
+            }
+
+            const isSpecial = /ba[uú]l|chinauta|mascota|grande|maleta|vereda/i.test(text);
+            const price = text.toLowerCase().includes('chinauta') ? 25000 : (isSpecial ? 9500 : 8000);
+            sendQuickWhatsAppOrder(
+                'Ubicación WhatsApp (Fusagasugá)',
+                text,
+                price,
+                isSpecial ? `Solicitud especial: "${text}"` : 'Solicitud vía Bot WhatsApp',
+                isSpecial
+            );
+        }
+
+        // 6. ACCESOS: LOGIN OPERADOR Y PORTAL CONDUCTOR + PWA INSTALL
+        let deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+        });
+
+        async function triggerPwaInstall() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice;
+                deferredInstallPrompt = null;
+                showNotification('Instalación de PWA iniciada', 'install_mobile');
+            } else {
+                showNotification('Redirigiendo a la PWA del Conductor para agregar a pantalla de inicio...', 'smartphone');
+                setTimeout(() => { window.location.href = '3_conductor.html'; }, 900);
+            }
+        }
+
+        function submitDriverRegistration(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-driver-name').value.trim();
+            const plate = document.getElementById('reg-driver-plate').value.trim().toUpperCase();
+            if (!name || !plate) return;
+
+            const fleet = HalconesStore.getFleet();
+            const newCode = 'HLC-' + Math.floor(130 + Math.random() * 60);
+            fleet.push({
+                id: newCode,
+                name,
+                plate,
+                vehicle: 'Vehículo Afiliado',
+                status: 'DISPONIBLE',
+                reason: null,
+                currentServiceId: null,
+                lat: 4.3350 + (Math.random() * 0.008 - 0.004),
+                lng: -74.3630 + (Math.random() * 0.008 - 0.004),
+                phone: '573100000000'
+            });
+            HalconesStore.saveFleet(fleet);
+            closeModal('modal-driver-portal');
+            showNotification(`¡Bienvenido ${name} (${newCode})! Ya apareces en la flota activa.`, 'verified');
+        }
+
+        function fillDemoOperator() {
+            document.getElementById('op-email').value = 'central@halconesfusa.com';
+            document.getElementById('op-pass').value = 'Halcones2026*';
+            showNotification('Credenciales de operador restauradas', 'lock_open');
+        }
+
+        function handleOperatorLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('op-email').value.trim();
+            localStorage.setItem(HalconesStore.KEYS.OPERATOR, JSON.stringify({
+                name: 'Javier Ramírez (Despachador Turno 1)',
+                email,
+                role: 'DISPATCHER',
+                loggedAt: new Date().toISOString()
+            }));
+            showNotification('Sesión verificada. Abriendo Consola Central...', 'Verified');
+            setTimeout(() => {
+                window.location.href = '2_consola.html';
+            }, 450);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            HalconesStore.initDefaults();
+            calculateQuote();
+            initScrollSpy();
+        });
+    </script>
+</body>
+</html>

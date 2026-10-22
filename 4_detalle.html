@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hoja de Ruta y Auditoría de Viaje | Halcones Fusagasugá</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,700;1,900&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        surface: '#131313',
+                        'surface-container': '#1f1f1f',
+                        'surface-container-high': '#2a2a2a',
+                        'surface-container-lowest': '#0e0e0e',
+                        primary: '#ffb3b1',
+                        'primary-container': '#c8102e',
+                        secondary: '#4edea3',
+                        tertiary: '#ffb95f',
+                        danger: '#ffb4ab',
+                        'danger-container': '#93000a',
+                        white: '#f5f5f5',
+                        muted: '#a7a7a7'
+                    },
+                    fontFamily: {
+                        display: ['Montserrat', 'sans-serif'],
+                        body: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body { background: #131313; color: #f5f5f5; font-family: 'Outfit', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(31, 31, 31, 0.92); border: 1px solid rgba(255, 255, 255, 0.09); }
+        .detail-card { transition: transform 0.2s ease, border-color 0.2s ease; }
+        .detail-card:hover { transform: translateY(-1px); border-color: rgba(255, 255, 255, 0.18); }
+        @media print {
+            body { background: #ffffff !important; color: #000000 !important; }
+            .no-print { display: none !important; }
+            .glass { background: #ffffff !important; border: 1px solid #cccccc !important; color: #000000 !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-surface text-white min-h-screen">
+
+    <div class="max-w-2xl mx-auto px-4 py-6 pb-20">
+        <!-- BARRA SUPERIOR DE NAVEGACIÓN DUAL (CONSOLA Y CONDUCTOR) -->
+        <header class="mb-6">
+            <div class="no-print flex flex-wrap items-center justify-between gap-2 mb-5 pb-4 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                    <a id="btn-back-consola" href="2_consola.html" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-high hover:bg-primary-container text-xs font-bold uppercase tracking-wider text-white transition-colors border border-white/10">
+                        <span class="material-symbols-outlined text-[16px]">radar</span>
+                        <span>Volver a Consola (2)</span>
+                    </a>
+                    <a id="btn-back-conductor" href="3_conductor.html" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-high hover:bg-secondary hover:text-black text-xs font-bold uppercase tracking-wider text-white transition-colors border border-white/10">
+                        <span class="material-symbols-outlined text-[16px]">local_taxi</span>
+                        <span>Volver a Conductor (3)</span>
+                    </a>
+                </div>
+
+                <!-- Selector Rápido de Bitácora -->
+                <div class="flex items-center gap-2">
+                    <label for="audit-selector" class="text-[10px] font-bold uppercase tracking-wider text-muted">Servicio:</label>
+                    <select id="audit-selector" onchange="selectServiceFromDropdown(this.value)" class="bg-surface-container-lowest border border-white/15 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-secondary focus:outline-none focus:border-secondary"></select>
+                </div>
+            </div>
+
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/15 border border-secondary/30 text-secondary text-[10px] font-bold uppercase tracking-widest mb-2">
+                        <span class="material-symbols-outlined text-[14px]">fact_check</span>
+                        <span>Hoja de Ruta & Auditoría Oficial</span>
+                    </div>
+                    <h1 id="detail-service-id" class="font-display text-2xl sm:text-3xl font-black uppercase tracking-tight">Servicio #HLC-9355</h1>
+                    <p id="detail-notes" class="text-xs text-muted mt-1">Registro certificado de despacho y trazabilidad en Fusagasugá.</p>
+                </div>
+                <button onclick="window.print()" class="no-print px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                    <span class="material-symbols-outlined text-[17px] text-secondary">print</span>
+                    <span class="hidden sm:inline">Imprimir</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- TARJETA 1: ESTADO FINAL, TARIFA Y TIEMPOS DE AUDITORÍA -->
+        <section class="detail-card glass rounded-3xl p-5 mb-4 shadow-2xl">
+            <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+                <div>
+                    <p class="text-[10px] uppercase tracking-[0.22em] text-muted font-bold">Estado de Auditoría</p>
+                    <p id="detail-status" class="text-lg font-black text-secondary mt-0.5 uppercase">COMPLETADO</p>
+                    <p id="detail-cancel-reason" class="hidden text-xs text-danger font-medium mt-1"></p>
+                </div>
+                <div id="detail-status-icon-box" class="w-12 h-12 rounded-2xl flex items-center justify-center bg-secondary/15 text-secondary border border-secondary/30">
+                    <span id="detail-status-icon" class="material-symbols-outlined text-3xl">verified</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-surface-container-lowest rounded-2xl p-3 border border-white/5">
+                    <p class="text-[10px] uppercase text-muted font-bold">Tarifa Regulada</p>
+                    <p id="detail-fare" class="text-lg font-mono font-black text-secondary mt-1">$7.500 COP</p>
+                </div>
+                <div class="bg-surface-container-lowest rounded-2xl p-3 border border-white/5">
+                    <p class="text-[10px] uppercase text-muted font-bold">Tiempo Espera</p>
+                    <p id="detail-wait-time" class="text-lg font-mono font-black text-white mt-1">00:28 s</p>
+                </div>
+                <div class="bg-surface-container-lowest rounded-2xl p-3 border border-white/5">
+                    <p class="text-[10px] uppercase text-muted font-bold">Duración Ruta</p>
+                    <p id="detail-duration" class="text-lg font-mono font-black text-white mt-1">7 min</p>
+                </div>
+                <div class="bg-surface-container-lowest rounded-2xl p-3 border border-white/5">
+                    <p class="text-[10px] uppercase text-muted font-bold">Distancia</p>
+                    <p id="detail-distance" class="text-lg font-mono font-black text-tertiary mt-1">2.1 km</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TARJETA 2: TRAZABILIDAD DE RUTA Y HORARIOS -->
+        <section class="detail-card glass rounded-3xl p-5 mb-4">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">route</span>
+                    <h2 class="font-display text-sm font-black uppercase tracking-wider">Hoja de Ruta y Cronología</h2>
+                </div>
+                <span id="detail-date-badge" class="font-mono text-[11px] text-muted">Hoy • Fusagasugá</span>
+            </div>
+
+            <div class="relative pl-3 space-y-5">
+                <div class="absolute left-[14px] top-3 bottom-3 w-0.5 bg-white/15"></div>
+
+                <div class="relative flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="relative z-10 w-7 h-7 rounded-full bg-secondary/20 border border-secondary/50 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-secondary text-[15px]">trip_origin</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase text-secondary font-bold">Punto de Recogida (Origen)</p>
+                            <p id="detail-origin" class="text-sm font-bold text-white">Parque Principal, Centro</p>
+                        </div>
+                    </div>
+                    <span id="detail-time-requested" class="font-mono text-[11px] text-muted shrink-0">Solicitado: --:--</span>
+                </div>
+
+                <div class="relative flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="relative z-10 w-7 h-7 rounded-full bg-tertiary/20 border border-tertiary/50 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-tertiary text-[15px]">local_taxi</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase text-tertiary font-bold">Despacho y Abordaje</p>
+                            <p id="detail-dispatch-mode" class="text-xs text-gray-300">Asignado en automático por proximidad GPS</p>
+                        </div>
+                    </div>
+                    <span id="detail-time-assigned" class="font-mono text-[11px] text-muted shrink-0">Asignado: --:--</span>
+                </div>
+
+                <div class="relative flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="relative z-10 w-7 h-7 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-primary text-[15px]">location_on</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase text-primary font-bold">Punto de Destino Final</p>
+                            <p id="detail-destination" class="text-sm font-bold text-white">Hospital San Rafael, Balmoral</p>
+                        </div>
+                    </div>
+                    <span id="detail-time-completed" class="font-mono text-[11px] text-muted shrink-0">Cierre: --:--</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TARJETA 3: PASAJERO Y CONDUCTOR ASIGNADO -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- Cliente -->
+            <section class="detail-card glass rounded-3xl p-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-primary text-[20px]">person</span>
+                    <h2 class="font-display text-xs font-black uppercase tracking-wider">Datos del Pasajero</h2>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p id="detail-customer" class="text-base font-bold text-white">Dra. Marcela Cortés</p>
+                        <p id="detail-customer-phone" class="text-xs font-mono text-secondary mt-0.5">+57 311 999 8877</p>
+                        <p class="text-[11px] text-muted mt-1">Canal: WhatsApp Oficial • ★ 4.9</p>
+                    </div>
+                    <div id="detail-customer-avatar" class="w-12 h-12 rounded-2xl bg-primary-container/25 border border-primary/30 flex items-center justify-center text-sm font-black text-primary">
+                        MC
+                    </div>
+                </div>
+            </section>
+
+            <!-- Conductor -->
+            <section class="detail-card glass rounded-3xl p-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-secondary text-[20px]">badge</span>
+                    <h2 class="font-display text-xs font-black uppercase tracking-wider">Unidad y Conductor</h2>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p id="detail-driver-name" class="text-base font-bold text-white">Julián V.</p>
+                        <p id="detail-driver-code" class="text-xs font-mono text-tertiary mt-0.5">Móvil HLC-102 • Placa TZV-412</p>
+                        <p class="text-[11px] text-muted mt-1">Flota Certificada Halcones</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-secondary/15 border border-secondary/30 flex items-center justify-center text-secondary">
+                        <span class="material-symbols-outlined">directions_car</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- TARJETA 4: DESGLOSE DE LIQUIDACIÓN Y PAGO -->
+        <section class="detail-card glass rounded-3xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-secondary">payments</span>
+                <h2 class="font-display text-sm font-black uppercase tracking-wider">Auditoría Financiera del Servicio</h2>
+            </div>
+            <div class="space-y-2.5 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-muted">Método de Pago Registrado</span>
+                    <span id="detail-payment-method" class="font-bold text-white uppercase">Efectivo</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-muted">Tarifa Base Municipal (Fusagasugá)</span>
+                    <span id="detail-base-fare" class="font-mono font-bold text-white">$7.500 COP</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-muted">Recargos / Comisión por Carrera</span>
+                    <span id="detail-commission" class="font-mono font-bold text-secondary">$0 COP (100% para el Conductor)</span>
+                </div>
+                <div class="flex justify-between text-sm pt-3 border-t border-white/10">
+                    <span class="font-bold text-white uppercase">Total Neto Liquidado</span>
+                    <span id="detail-net" class="font-mono font-black text-secondary text-base">$7.500 COP</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- BOTONES DE ACCIÓN INFERIOR -->
+        <div class="no-print grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a href="2_consola.html" class="py-3.5 px-4 rounded-2xl bg-surface-container-high hover:bg-primary-container text-white font-display text-xs font-black uppercase tracking-wider text-center transition-colors flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">radar</span>
+                <span>Consola Central</span>
+            </a>
+            <a href="3_conductor.html" class="py-3.5 px-4 rounded-2xl bg-secondary hover:bg-emerald-400 text-black font-display text-xs font-black uppercase tracking-wider text-center transition-colors flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">smartphone</span>
+                <span>Historial Conductor</span>
+            </a>
+            <a id="detail-map" href="https://www.google.com/maps?q=4.3365,-74.3635" target="_blank" rel="noopener noreferrer" class="py-3.5 px-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-display text-xs font-bold uppercase tracking-wider text-center transition-colors flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px] text-tertiary">map</span>
+                <span>Ver Ruta en Maps</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- CONTROLADOR DE AUDITORÍA: LECTURA REACTIVA DE LOCALSTORAGE Y PARÁMETROS -->
+    <!-- ========================================================================= -->
+    <script>
+        const SERVICES_KEY = 'halcones_servicios';
+
+        function getServicesList() {
+            try {
+                const list = JSON.parse(localStorage.getItem(SERVICES_KEY) || '[]');
+                if (list.length > 0) return list;
+            } catch (_) {}
+
+            // Datos iniciales por defecto si se abre 4_detalle.html directamente
+            const now = new Date();
+            const fallback = [
+                {
+                    id: 'HLC-9355',
+                    origin: 'Parque Principal, Centro',
+                    dest: 'Hospital San Rafael, Balmoral',
+                    price: 7500,
+                    dist: '2.1 km',
+                    duration: '7 min',
+                    customerName: 'Dra. Marcela Cortés',
+                    customerPhone: '573119998877',
+                    notes: 'Servicio urbano estándar',
+                    requiresManual: false,
+                    status: 'COMPLETADO',
+                    driverCode: 'HLC-102',
+                    driverName: 'Julián V.',
+                    driverPlate: 'TZV-412',
+                    paymentMethod: 'Efectivo',
+                    createdAt: new Date(now.getTime() - 3600000).toISOString(),
+                    assignedAt: new Date(now.getTime() - 3572000).toISOString(),
+                    startedAt: new Date(now.getTime() - 3400000).toISOString(),
+                    completedAt: new Date(now.getTime() - 2980000).toISOString(),
+                    lat: 4.3358,
+                    lng: -74.3662
+                }
+            ];
+            localStorage.setItem(SERVICES_KEY, JSON.stringify(fallback));
+            return fallback;
+        }
+
+        function formatCOP(val) {
+            return '$' + Math.round(Number(val || 0)).toLocaleString('es-CO') + ' COP';
+        }
+
+        function formatTimeOnly(isoStr) {
+            if (!isoStr) return '--:--';
+            const d = new Date(isoStr);
+            if (isNaN(d.getTime())) return '--:--';
+            return d.toLocaleTimeString('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function renderServiceDetail(serviceId) {
+            const list = getServicesList();
+            const srv = list.find(s => String(s.id) === String(serviceId)) || list[0];
+            if (!srv) return;
+
+            // Poblar selector superior
+            const selector = document.getElementById('audit-selector');
+            selector.innerHTML = list.map(item => `
+                <option value="${item.id}" ${item.id === srv.id ? 'selected' : ''}>
+                    #${item.id} • ${item.status} (${formatCOP(item.price)})
+                </option>
+            `).join('');
+
+            // Identificación y notas
+            document.getElementById('detail-service-id').textContent = `Servicio #${srv.id}`;
+            document.getElementById('detail-notes').textContent = srv.notes || 'Bitácora de servicio auditada por Central Halcones Fusagasugá.';
+
+            // Configuración visual según Estado Final
+            const statusMap = {
+                COMPLETADO: { text: 'COMPLETADO EXITOSAMENTE', cls: 'text-secondary', box: 'bg-secondary/15 text-secondary border-secondary/30', icon: 'verified' },
+                EN_VIAJE: { text: 'EN CURSO (CON PASAJERO)', cls: 'text-tertiary', box: 'bg-tertiary/15 text-tertiary border-tertiary/30', icon: 'directions_car' },
+                EN_CAMINO: { text: 'EN CAMINO A RECOGIDA', cls: 'text-tertiary', box: 'bg-tertiary/15 text-tertiary border-tertiary/30', icon: 'near_me' },
+                OFFERED: { text: 'OFRECIDO A UNIDAD MÓVIL', cls: 'text-blue-400', box: 'bg-blue-500/15 text-blue-400 border-blue-500/30', icon: 'notifications_active' },
+                AUTOMATIC_DISPATCH: { text: 'EN COLA AUTOMÁTICA IA (30S)', cls: 'text-secondary', box: 'bg-secondary/15 text-secondary border-secondary/30', icon: 'smart_toy' },
+                MANUAL_REQUIRED: { text: 'REQUIERE ASIGNACIÓN MANUAL', cls: 'text-tertiary', box: 'bg-tertiary/15 text-tertiary border-tertiary/30', icon: 'pan_tool' },
+                REASIGNACION_URGENTE: { text: 'REASIGNACIÓN URGENTE EN CONSOLA', cls: 'text-danger', box: 'bg-danger-container/40 text-danger border-danger/40', icon: 'warning' },
+                CANCELADO_CLIENTE: { text: 'CANCELADO POR EL CLIENTE (WHATSAPP)', cls: 'text-danger', box: 'bg-danger-container/40 text-danger border-danger/40', icon: 'cancel' },
+                CANCELADO_CONDUCTOR: { text: 'CANCELADO POR EL CONDUCTOR', cls: 'text-danger', box: 'bg-danger-container/40 text-danger border-danger/40', icon: 'cancel' }
+            };
+
+            const st = statusMap[srv.status] || { text: srv.status, cls: 'text-white', box: 'bg-white/10 text-white border-white/20', icon: 'info' };
+            const statusEl = document.getElementById('detail-status');
+            statusEl.textContent = st.text;
+            statusEl.className = `text-lg font-black mt-0.5 uppercase ${st.cls}`;
+
+            const iconBox = document.getElementById('detail-status-icon-box');
+            iconBox.className = `w-12 h-12 rounded-2xl flex items-center justify-center border ${st.box}`;
+            document.getElementById('detail-status-icon').textContent = st.icon;
+
+            const cancelReasonEl = document.getElementById('detail-cancel-reason');
+            if (srv.cancelReason) {
+                cancelReasonEl.textContent = `Motivo registrado: ${srv.cancelReason}`;
+                cancelReasonEl.classList.remove('hidden');
+            } else {
+                cancelReasonEl.classList.add('hidden');
+            }
+
+            // Métricas de tarifa y tiempos
+            const isCancelled = String(srv.status).startsWith('CANCELADO');
+            document.getElementById('detail-fare').textContent = formatCOP(srv.price);
+            document.getElementById('detail-duration').textContent = srv.duration || '8 min';
+            document.getElementById('detail-distance').textContent = srv.dist || '2.8 km';
+
+            if (srv.createdAt && srv.assignedAt) {
+                const diffSec = Math.max(4, Math.round((new Date(srv.assignedAt) - new Date(srv.createdAt)) / 1000));
+                document.getElementById('detail-wait-time').textContent = `${diffSec} seg`;
+            } else {
+                document.getElementById('detail-wait-time').textContent = '24 seg';
+            }
+
+            // Ruta y cronología
+            document.getElementById('detail-origin').textContent = srv.origin;
+            document.getElementById('detail-destination').textContent = srv.dest;
+            document.getElementById('detail-dispatch-mode').textContent = srv.requiresManual
+                ? 'Filtro Humano: Despachado manualmente por el operador en turno'
+                : 'Despacho Automático IA: Asignado al móvil más cercano por GPS';
+
+            document.getElementById('detail-time-requested').textContent = `Solicitado: ${formatTimeOnly(srv.createdAt)}`;
+            document.getElementById('detail-time-assigned').textContent = `Asignado: ${formatTimeOnly(srv.assignedAt || srv.createdAt)}`;
+            document.getElementById('detail-time-completed').textContent = `Cierre: ${formatTimeOnly(srv.completedAt)}`;
+
+            if (srv.createdAt) {
+                document.getElementById('detail-date-badge').textContent = new Date(srv.createdAt).toLocaleDateString('es-CO', {
+                    timeZone: 'America/Bogota',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+
+            // Pasajero y Conductor
+            const custName = srv.customerName || 'Pasajero WhatsApp';
+            document.getElementById('detail-customer').textContent = custName;
+            document.getElementById('detail-customer-phone').textContent = srv.customerPhone ? `+${srv.customerPhone}` : '+57 310 555 4321';
+            document.getElementById('detail-customer-avatar').textContent = custName.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'PH';
+
+            document.getElementById('detail-driver-name').textContent = srv.driverName || 'Pendiente de Asignar';
+            document.getElementById('detail-driver-code').textContent = srv.driverCode
+                ? `Móvil ${srv.driverCode} • Placa ${srv.driverPlate || 'TZV-412'}`
+                : 'En cola de despacho central';
+
+            // Liquidación Financiera
+            document.getElementById('detail-payment-method').textContent = isCancelled ? 'Sin Cobro (Cancelado)' : (srv.paymentMethod || 'Efectivo');
+            document.getElementById('detail-base-fare').textContent = formatCOP(srv.price);
+            document.getElementById('detail-net').textContent = isCancelled ? '$0 COP' : formatCOP(srv.price);
+
+            // Enlace a Google Maps
+            const lat = srv.lat || 4.3370;
+            const lng = srv.lng || -74.3630;
+            document.getElementById('detail-map').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}`;
+        }
+
+        function selectServiceFromDropdown(id) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('id', id);
+            window.history.replaceState({}, '', url.toString());
+            renderServiceDetail(id);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const idParam = params.get('id');
+            const fromParam = params.get('from');
+
+            if (fromParam === 'consola') {
+                document.getElementById('btn-back-consola').classList.add('bg-primary-container', 'border-primary');
+            } else if (fromParam === 'conductor') {
+                document.getElementById('btn-back-conductor').classList.add('bg-secondary', 'text-black');
+            }
+
+            renderServiceDetail(idParam);
+        });
+    </script>
+</body>
+</html>

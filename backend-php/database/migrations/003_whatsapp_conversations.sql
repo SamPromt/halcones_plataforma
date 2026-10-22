@@ -1,0 +1,19 @@
+USE halcones;
+
+CREATE TABLE IF NOT EXISTS whatsapp_conversations (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  sender_phone VARCHAR(20) NOT NULL,
+  customer_id BIGINT UNSIGNED NULL,
+  state ENUM('AWAITING_ORIGIN', 'AWAITING_DESTINATION', 'READY', 'SUBMITTED') NOT NULL DEFAULT 'AWAITING_ORIGIN',
+  draft_origin VARCHAR(500) NULL,
+  draft_destination VARCHAR(500) NULL,
+  last_message_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  expires_at DATETIME NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_whatsapp_conversation_phone (sender_phone),
+  KEY idx_whatsapp_conversation_expiry (expires_at),
+  CONSTRAINT fk_whatsapp_customer FOREIGN KEY (customer_id) REFERENCES users (id)
+    ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB;

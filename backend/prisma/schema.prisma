@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("driver")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Driver {
+  id            String   @id @default(cuid())
+  name          String
+  code          String   @unique
+  vehicleModel  String
+  plate         String   @unique
+  status        String   @default("DISPONIBLE")
+  lastLocation  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Ride {
+  id          String   @id @default(cuid())
+  externalId  String   @unique
+  origin      String
+  destination String
+  price       Int
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
